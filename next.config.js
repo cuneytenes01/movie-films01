@@ -8,8 +8,11 @@ const nextConfig = {
         pathname: '/t/p/**',
       },
     ],
-    unoptimized: false,
+    // Cloudflare Pages için image optimization'ı kapat
+    unoptimized: true,
   },
+  // Cloudflare Pages için output ayarı
+  output: 'standalone',
 }
 
 module.exports = nextConfig
