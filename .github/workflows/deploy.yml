@@ -29,5 +29,6 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: 32b14dd25faa2809243e92fa9f0bcb23
           command: pages deploy .vercel/output/static --project-name=movie-films
+        env:
+          CLOUDFLARE_ACCOUNT_ID: 32b14dd25faa2809243e92fa9f0bcb23
