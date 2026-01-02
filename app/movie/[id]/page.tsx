@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation'
 import CastCarousel from '@/components/CastCarousel'
 import WatchProviders from '@/components/WatchProviders'
 
+export const runtime = 'edge';
+
 export default async function MovieDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   let movie;
