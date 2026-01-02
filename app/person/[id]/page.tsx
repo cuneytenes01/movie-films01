@@ -6,6 +6,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { getPersonDetails, getPersonCredits, getProfileUrl, getPosterUrl, PersonDetails, PersonCredits } from '@/lib/tmdb'
 
+export const runtime = 'edge';
+
 export default function PersonDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
