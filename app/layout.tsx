@@ -19,16 +19,16 @@ export default function RootLayout({
       <body className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen transition-colors duration-200">
         <ThemeProvider>
           <nav className="bg-white dark:bg-gradient-to-r dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 shadow-lg">
-            <div className="container mx-auto px-4 py-3">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4">
+            <div className="container mx-auto px-3 md:px-4 py-2 md:py-3">
+              <div className="flex items-center justify-between gap-2 md:gap-4">
                 {/* Hamburger Menu - Sadece mobilde görünür, logonun solunda */}
-                <div className="md:hidden">
+                <div className="md:hidden flex-shrink-0">
                   <MobileMenu />
                 </div>
-                <a href="/" className="flex items-center gap-3 text-xl md:text-2xl font-bold transition whitespace-nowrap group relative z-50 hover:opacity-90">
+                <a href="/" className="flex items-center gap-2 md:gap-3 text-xl md:text-2xl font-bold transition whitespace-nowrap group relative z-50 hover:opacity-90 flex-1 md:flex-initial justify-center md:justify-start">
                   <div className="relative z-50">
                     {/* Modern Premium DİZİYOO Logo - Clean & Professional Design */}
-                    <svg className="w-14 h-14 md:w-20 md:h-20 transition-transform group-hover:scale-105 duration-300" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg className="w-10 h-10 md:w-20 md:h-20 transition-transform group-hover:scale-105 duration-300" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <defs>
                         <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                           <stop offset="0%" stopColor="#6366f1" />
@@ -66,7 +66,7 @@ export default function RootLayout({
                       <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
                     </svg>
                   </div>
-                  <span className="font-extrabold tracking-tight text-3xl md:text-4xl" style={{ 
+                  <span className="font-extrabold tracking-tight text-2xl md:text-4xl" style={{ 
                     background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
