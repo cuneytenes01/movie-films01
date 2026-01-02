@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 interface TrailerPlayerProps {
   trailerKey: string;
@@ -9,8 +10,33 @@ interface TrailerPlayerProps {
 
 export default function TrailerPlayer({ trailerKey, title }: TrailerPlayerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Body scroll kontrolü
+  useEffect(() => {
+    if (isOpen) {
+      // Modal açıldığında body scroll'unu engelle
+      document.body.style.overflow = 'hidden';
+      // Sayfa içeriğini gizlemek için body'ye class ekle
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      
+      return () => {
+        // Modal kapandığında geri al
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+      };
+    }
+  }, [isOpen]);
 
   if (!trailerKey) return null;
+  
+  if (!mounted) return null;
 
   return (
     <>
@@ -26,15 +52,23 @@ export default function TrailerPlayer({ trailerKey, title }: TrailerPlayerProps)
         <div className="absolute inset-0 rounded-full bg-white/20 scale-0 group-hover:scale-100 transition-transform duration-300" />
       </button>
 
-      {isOpen && (
+      {isOpen && createPortal(
         <div
-          className="fixed inset-0 bg-black z-[9999] flex items-center justify-center p-0"
+          className="fixed inset-0 bg-black flex items-center justify-center p-0"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setIsOpen(false);
             }
           }}
-          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0,
+            zIndex: 99999,
+            backgroundColor: '#000000'
+          }}
         >
           {/* Kapat Butonu - Sol üst köşede, her zaman görünür */}
           <button
@@ -42,9 +76,12 @@ export default function TrailerPlayer({ trailerKey, title }: TrailerPlayerProps)
               e.stopPropagation();
               setIsOpen(false);
             }}
-            className="fixed top-4 left-4 z-[10000] w-14 h-14 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-all shadow-2xl border-3 border-white/40 hover:scale-110"
+            className="fixed top-4 left-4 w-14 h-14 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-all shadow-2xl border-3 border-white/40 hover:scale-110"
             aria-label="Kapat"
-            style={{ position: 'fixed' }}
+            style={{ 
+              position: 'fixed',
+              zIndex: 100000
+            }}
           >
             <svg
               className="w-8 h-8 text-white"
@@ -72,9 +109,12 @@ export default function TrailerPlayer({ trailerKey, title }: TrailerPlayerProps)
                 alert('Link kopyalandı!');
               }
             }}
-            className="fixed top-4 left-20 z-[10000] w-14 h-14 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all shadow-2xl border-3 border-white/40 hover:scale-110"
+            className="fixed top-4 left-20 w-14 h-14 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all shadow-2xl border-3 border-white/40 hover:scale-110"
             aria-label="Paylaş"
-            style={{ position: 'fixed' }}
+            style={{ 
+              position: 'fixed',
+              zIndex: 100000
+            }}
           >
             <svg
               className="w-8 h-8 text-white"
@@ -98,7 +138,8 @@ export default function TrailerPlayer({ trailerKey, title }: TrailerPlayerProps)
               style={{ pointerEvents: 'auto' }}
             />
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

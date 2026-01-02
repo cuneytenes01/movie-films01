@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getPosterUrl, getBackdropUrl } from '@/lib/tmdb'
@@ -34,6 +35,11 @@ export default function LatestTrailers() {
   const [loading, setLoading] = useState(true);
   const [selectedTrailer, setSelectedTrailer] = useState<TrailerItem | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     fetchTrailers(activeFilter);
@@ -237,16 +243,24 @@ export default function LatestTrailers() {
           </div>
       </section>
 
-      {/* Trailer Modal */}
-      {selectedTrailer && selectedTrailer.trailer_key && (
+      {/* Trailer Modal - React Portal ile body'ye render */}
+      {mounted && selectedTrailer && selectedTrailer.trailer_key && createPortal(
         <div
-          className="fixed inset-0 bg-black z-[9999] flex items-center justify-center p-0"
+          className="fixed inset-0 bg-black flex items-center justify-center p-0"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               closeTrailer();
             }
           }}
-          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0,
+            zIndex: 99999,
+            backgroundColor: '#000000'
+          }}
         >
           {/* Kapat Butonu - Sol üst köşede, her zaman görünür */}
           <button
@@ -254,9 +268,12 @@ export default function LatestTrailers() {
               e.stopPropagation();
               closeTrailer();
             }}
-            className="fixed top-4 left-4 z-[10000] w-14 h-14 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-all shadow-2xl border-3 border-white/40 hover:scale-110"
+            className="fixed top-4 left-4 w-14 h-14 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-all shadow-2xl border-3 border-white/40 hover:scale-110"
             aria-label="Kapat"
-            style={{ position: 'fixed' }}
+            style={{ 
+              position: 'fixed',
+              zIndex: 100000
+            }}
           >
             <svg
               className="w-8 h-8 text-white"
@@ -284,9 +301,12 @@ export default function LatestTrailers() {
                 alert('Link kopyalandı!');
               }
             }}
-            className="fixed top-4 left-20 z-[10000] w-14 h-14 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all shadow-2xl border-3 border-white/40 hover:scale-110"
+            className="fixed top-4 left-20 w-14 h-14 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all shadow-2xl border-3 border-white/40 hover:scale-110"
             aria-label="Paylaş"
-            style={{ position: 'fixed' }}
+            style={{ 
+              position: 'fixed',
+              zIndex: 100000
+            }}
           >
             <svg
               className="w-8 h-8 text-white"
@@ -309,7 +329,8 @@ export default function LatestTrailers() {
               style={{ pointerEvents: 'auto' }}
             />
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
