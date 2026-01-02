@@ -125,7 +125,7 @@ export default async function Home() {
 
       {/* Trending Carousel - Full width with gray background */}
       {trendingToday.results.length > 0 && trendingWeek.results.length > 0 && (
-        <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-8 mb-12 w-full">
+        <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-6 mb-12 w-full">
           <TrendingCarousel 
             trendingToday={trendingToday.results.slice(0, 20)} 
             trendingWeek={trendingWeek.results.slice(0, 20)} 

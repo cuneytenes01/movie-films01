@@ -94,7 +94,7 @@ export default function LatestTrailers() {
 
   return (
     <>
-      <section className="mb-12 bg-gradient-to-br from-orange-600 via-red-600 to-pink-600 py-12 w-full">
+      <section className="mb-12 bg-gradient-to-br from-orange-600 via-red-600 to-pink-600 py-8 w-full">
         <div className="w-full px-6 md:px-8">
           <div className="mb-6">
             <h2 className="text-3xl md:text-4xl font-bold text-white">Son Fragmanlar</h2>
