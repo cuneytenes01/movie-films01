@@ -1,6 +1,6 @@
 # 🎬 YÜCETÜRK MEDİA - Film ve Dizi Kataloğu
 
-TMDB API kullanarak oluşturulmuş modern bir film ve TV dizisi keşif platformu.
+TMDB API kullanarak oluşturulmuş modern bir film ve TV dizisi keşif platformu. 
 
 ## ✨ Özellikler
 
