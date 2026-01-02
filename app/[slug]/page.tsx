@@ -1,4 +1,4 @@
-import { getMovieDetails, getTVShowDetails, getMovieCredits, getTVShowCredits, getMovieWatchProviders, getTVWatchProviders, getPersonDetails, getPersonCredits, getPosterUrl, getBackdropUrl, getProfileUrl } from '@/lib/tmdb'
+import { getMovieDetails, getTVShowDetails, getMovieCredits, getTVShowCredits, getMovieWatchProviders, getTVWatchProviders, getPersonDetails, getPersonCredits, getPosterUrl, getBackdropUrl, getProfileUrl, getMovieVideos, getTVVideos } from '@/lib/tmdb'
 import { getIdFromSlug, getPersonIdFromSlug, createSlug } from '@/lib/slug'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -6,6 +6,8 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import CastCarousel from '@/components/CastCarousel'
 import WatchProviders from '@/components/WatchProviders'
+import PersonCreditsList from '@/components/PersonCreditsList'
+import TrailerPlayer from '@/components/TrailerPlayer'
 
 export const runtime = 'edge';
 
@@ -106,8 +108,7 @@ export default async function ContentDetailPage({ params }: { params: Promise<{ 
         const dateA = 'release_date' in a ? a.release_date : a.first_air_date;
         const dateB = 'release_date' in b ? b.release_date : b.first_air_date;
         return new Date(dateB).getTime() - new Date(dateA).getTime();
-      })
-      .slice(0, 12);
+      });
 
     return (
       <div className="min-h-screen bg-gray-900">
@@ -187,53 +188,7 @@ export default async function ContentDetailPage({ params }: { params: Promise<{ 
           </div>
 
           {knownFor.length > 0 && (
-            <div className="mt-12">
-              <h2 className="text-3xl font-bold mb-6 text-white">Bilinen Yapımlar</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {knownFor.map((item) => {
-                  const title = 'title' in item ? item.title : item.name;
-                  const date = 'release_date' in item ? item.release_date : item.first_air_date;
-                  const url = item.media_type === 'movie' ? `/${createSlug(item.title, 'movie')}` : `/${createSlug(item.name, 'tv')}`;
-                  const character = item.character || item.job;
-
-                  return (
-                    <Link key={`${item.media_type}-${item.id}`} href={url} className="group">
-                      <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800 mb-2">
-                        <Image
-                          src={getPosterUrl(item.poster_path)}
-                          alt={title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                          unoptimized={item.poster_path === null}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="absolute bottom-0 left-0 right-0 p-4">
-                            <p className="text-sm font-semibold line-clamp-2 text-white">{title}</p>
-                            {character && (
-                              <p className="text-xs text-gray-300 mt-1 line-clamp-1">{character}</p>
-                            )}
-                            {date && (
-                              <p className="text-xs text-gray-400 mt-1">
-                                {new Date(date).getFullYear()}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="px-1">
-                        <p className="text-white font-semibold text-sm line-clamp-1 group-hover:text-primary-400 transition">
-                          {title}
-                        </p>
-                        {character && (
-                          <p className="text-gray-400 text-xs mt-1 line-clamp-1">{character}</p>
-                        )}
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
+            <PersonCreditsList credits={knownFor} />
           )}
         </div>
       </div>
@@ -244,39 +199,60 @@ export default async function ContentDetailPage({ params }: { params: Promise<{ 
   const { id, type } = await getIdFromSlug(slug);
   
   if (!id || !type) {
+    console.error('Slug\'dan ID bulunamadı:', { slug, id, type });
     notFound();
   }
   
   let content: any;
   let credits: any;
   let watchProviders: any;
+  let videos: any;
   let contentTitle: string;
   
   try {
     if (type === 'movie') {
-      const [movieData, creditsData, providersData] = await Promise.all([
+      const [movieData, creditsData, providersData, videosData] = await Promise.all([
         getMovieDetails(id),
         getMovieCredits(id),
-        getMovieWatchProviders(id)
+        getMovieWatchProviders(id),
+        getMovieVideos(id)
       ]);
       content = movieData;
       credits = creditsData;
       watchProviders = providersData;
+      videos = videosData;
       contentTitle = movieData.title;
     } else {
-      const [tvShowData, creditsData, providersData] = await Promise.all([
+      const [tvShowData, creditsData, providersData, videosData] = await Promise.all([
         getTVShowDetails(id),
         getTVShowCredits(id),
-        getTVWatchProviders(id)
+        getTVWatchProviders(id),
+        getTVVideos(id)
       ]);
       content = tvShowData;
       credits = creditsData;
       watchProviders = providersData;
+      videos = videosData;
       contentTitle = tvShowData.name;
     }
   } catch (error) {
     notFound();
   }
+  
+  // Trailer'ı bul (YouTube'da olan, official olan tercih edilir)
+  const trailer = videos?.results?.find(
+    (v: any) => v.type === 'Trailer' && v.site === 'YouTube' && v.official
+  ) || videos?.results?.find(
+    (v: any) => v.type === 'Trailer' && v.site === 'YouTube'
+  ) || videos?.results?.find(
+    (v: any) => v.type === 'Trailer'
+  ) || videos?.results?.find(
+    (v: any) => v.type === 'Teaser' && v.site === 'YouTube'
+  ) || videos?.results?.find(
+    (v: any) => v.type === 'Teaser'
+  ) || videos?.results?.find(
+    (v: any) => v.type === 'Clip' && v.site === 'YouTube'
+  );
 
   const isMovie = type === 'movie';
   const releaseYear = isMovie 
@@ -312,6 +288,15 @@ export default async function ContentDetailPage({ params }: { params: Promise<{ 
             </Link>
           </div>
         </div>
+        
+        {/* Trailer Play Button - Backdrop üzerinde, ortada */}
+        {trailer && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <TrailerPlayer trailerKey={trailer.key} title={contentTitle} />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Content */}

@@ -3,6 +3,8 @@ import { getPopularMovies, getPopularTVShows, getTopRatedMovies, getTopRatedTVSh
 import { createSlug } from '@/lib/slug'
 import Image from 'next/image'
 import TrendingCarousel from '@/components/TrendingCarousel'
+import HeroSearchBar from '@/components/HeroSearchBar'
+import LatestTrailers from '@/components/LatestTrailers'
 
 async function MovieCard({ movie }: { movie: Movie }) {
   return (
@@ -110,16 +112,20 @@ export default async function Home() {
             <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-primary-400 via-primary-500 to-primary-600 bg-clip-text text-transparent leading-tight">
               Hoş Geldiniz.
             </h1>
-            <p className="text-xl md:text-2xl text-gray-800 dark:text-gray-300 max-w-3xl mx-auto font-medium">
+            <p className="text-xl md:text-2xl text-gray-800 dark:text-gray-300 max-w-3xl mx-auto font-medium mb-8">
               Milyonlarca film, TV dizisi ve kişiyi keşfedin. Şimdi keşfetmeye başlayın.
             </p>
+            <HeroSearchBar />
           </div>
         </div>
       </section>
 
-      {/* Trending Carousel - Full width with gradient background */}
+      {/* Latest Trailers - Full width with red gradient background */}
+      <LatestTrailers />
+
+      {/* Trending Carousel - Full width with gray background */}
       {trendingToday.results.length > 0 && trendingWeek.results.length > 0 && (
-        <div className="bg-gradient-to-br from-orange-600 via-red-600 to-pink-600 py-8 mb-12">
+        <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-8 mb-12 w-full">
           <TrendingCarousel 
             trendingToday={trendingToday.results.slice(0, 20)} 
             trendingWeek={trendingWeek.results.slice(0, 20)} 
@@ -127,7 +133,7 @@ export default async function Home() {
         </div>
       )}
 
-      <div className="pb-12">
+      <div>
 
         {/* Hata Mesajı */}
         {error && (
@@ -201,7 +207,7 @@ export default async function Home() {
 
         {/* En Yüksek Puanlı Diziler */}
         {topRatedTVShows.results.length > 0 && (
-          <section className="mb-12 bg-gradient-to-br from-purple-600 via-violet-600 to-fuchsia-600 py-8">
+          <section className="bg-gradient-to-br from-purple-600 via-violet-600 to-fuchsia-600 py-8">
             <div className="container mx-auto px-4">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-3xl font-bold text-white drop-shadow-lg">En Yüksek Puanlı Diziler</h2>

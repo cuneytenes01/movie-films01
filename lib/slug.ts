@@ -45,19 +45,38 @@ export function createSlug(title: string, type: 'movie' | 'tv'): string {
 
 // Slug'dan film/dizi adını çıkar
 function extractTitleFromSlug(slug: string): { title: string; type: 'movie' | 'tv' | null } {
+  // Boş veya sadece tire içeren slug'ları kontrol et
+  if (!slug || slug.trim() === '' || slug.trim() === '-') {
+    return { title: '', type: null };
+  }
+  
+  // Başta ve sonda tire'leri temizle
+  let cleanSlug = slug.trim().replace(/^-+|-+$/g, '');
+  
+  if (!cleanSlug || cleanSlug === '') {
+    return { title: '', type: null };
+  }
+  
   // Suffix'leri kaldır
-  let title = slug.replace(/-filmi-hangi-platformda$/, '');
+  let title = cleanSlug.replace(/-filmi-hangi-platformda$/, '');
   let type: 'movie' | 'tv' | null = 'movie';
   
-  if (title === slug) {
+  if (title === cleanSlug) {
     // Film suffix'i yoksa dizi suffix'ini dene
-    title = slug.replace(/-dizisi-hangi-platformda$/, '');
-    if (title !== slug) {
+    title = cleanSlug.replace(/-dizisi-hangi-platformda$/, '');
+    if (title !== cleanSlug) {
       type = 'tv';
     } else {
       // Hiçbiri yoksa null döndür
       return { title: '', type: null };
     }
+  }
+  
+  // Başta ve sonda kalan tire'leri temizle
+  title = title.replace(/^-+|-+$/g, '').trim();
+  
+  if (!title || title === '') {
+    return { title: '', type: null };
   }
   
   // Tire'leri boşluğa çevir
@@ -72,6 +91,7 @@ export async function getIdFromSlug(slug: string): Promise<{ id: number | null; 
     const { title, type } = extractTitleFromSlug(slug);
     
     if (!title || !type) {
+      console.error('extractTitleFromSlug başarısız:', { slug, title, type });
       return { id: null, type: null };
     }
     
@@ -79,6 +99,7 @@ export async function getIdFromSlug(slug: string): Promise<{ id: number | null; 
     const searchResults = await searchContent(title, 1);
     
     if (!searchResults.results || searchResults.results.length === 0) {
+      console.error('TMDB search sonuç bulamadı:', { title, type });
       return { id: null, type: null };
     }
     
@@ -92,6 +113,7 @@ export async function getIdFromSlug(slug: string): Promise<{ id: number | null; 
     });
     
     if (filteredResults.length === 0) {
+      console.error('Filtrelenmiş sonuç bulunamadı:', { title, type, totalResults: searchResults.results.length });
       return { id: null, type: null };
     }
     
@@ -111,6 +133,11 @@ export async function getIdFromSlug(slug: string): Promise<{ id: number | null; 
     }
     
     // Eşleşme yoksa yine de ilk sonucu döndür (fallback)
+    console.warn('Tam eşleşme bulunamadı, ilk sonuç kullanılıyor:', { 
+      searchTitle, 
+      resultTitle, 
+      id: firstResult.id 
+    });
     return { id: firstResult.id, type };
     
   } catch (error) {

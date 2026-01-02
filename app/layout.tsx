@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import SearchBar from '@/components/SearchBar'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import ThemeToggle from '@/components/ThemeToggle'
 
@@ -51,9 +50,6 @@ export default function RootLayout({
                     DİZİYOO
                   </span>
                 </a>
-                <div className="flex-1 w-full md:w-auto max-w-2xl">
-                  <SearchBar />
-                </div>
                 <div className="flex gap-3 md:gap-4 items-center text-sm md:text-base">
                   <a href="/" className="text-gray-900 dark:text-white hover:text-primary-400 transition font-medium">Ana Sayfa</a>
                   <a href="/movies" className="text-gray-900 dark:text-white hover:text-primary-400 transition font-medium">Filmler</a>

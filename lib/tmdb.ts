@@ -115,6 +115,26 @@ export interface WatchProvider {
   display_priority: number;
 }
 
+export interface Video {
+  key: string;
+  name: string;
+  type: 'Trailer' | 'Teaser' | 'Clip' | 'Featurette' | 'Behind the Scenes' | 'Bloopers';
+  site: 'YouTube' | 'Vimeo';
+  size: 360 | 480 | 720 | 1080;
+  official: boolean;
+  published_at: string;
+}
+
+export interface MovieVideos {
+  id: number;
+  results: Video[];
+}
+
+export interface TVVideos {
+  id: number;
+  results: Video[];
+}
+
 // API istekleri için yardımcı fonksiyon
 async function fetchFromTMDB(endpoint: string): Promise<any> {
   if (!API_KEY) {
@@ -161,6 +181,12 @@ export async function getTopRatedTVShows(page: number = 1): Promise<{ results: T
 // Yayında olan TV dizilerini getir
 export async function getOnTheAirTVShows(page: number = 1): Promise<{ results: TVShow[]; total_pages: number }> {
   const data = await fetchFromTMDB(`/tv/on_the_air?page=${page}`);
+  return { results: data.results, total_pages: data.total_pages };
+}
+
+// Şu anda sinemada olan filmleri getir
+export async function getNowPlayingMovies(page: number = 1): Promise<{ results: Movie[]; total_pages: number }> {
+  const data = await fetchFromTMDB(`/movie/now_playing?page=${page}`);
   return { results: data.results, total_pages: data.total_pages };
 }
 
@@ -248,6 +274,28 @@ export async function getMovieWatchProviders(id: number): Promise<WatchProvider[
   }
 }
 
+// Film watch providers bilgilerini getir (tüm bilgiler - rent, buy, flatrate)
+export async function getMovieWatchProvidersFull(id: number): Promise<{
+  flatrate?: WatchProvider[];
+  rent?: WatchProvider[];
+  buy?: WatchProvider[];
+}> {
+  try {
+    const data = await fetchFromTMDB(`/movie/${id}/watch/providers`);
+    if (data.results && data.results.TR) {
+      return {
+        flatrate: data.results.TR.flatrate || [],
+        rent: data.results.TR.rent || [],
+        buy: data.results.TR.buy || [],
+      };
+    }
+    return {};
+  } catch (error) {
+    console.error('Watch providers yüklenemedi:', error);
+    return {};
+  }
+}
+
 // TV dizisi watch providers bilgilerini getir (Türkiye bölgesi)
 export async function getTVWatchProviders(id: number): Promise<WatchProvider[]> {
   try {
@@ -263,6 +311,28 @@ export async function getTVWatchProviders(id: number): Promise<WatchProvider[]> 
   }
 }
 
+// TV dizisi watch providers bilgilerini getir (tüm bilgiler - rent, buy, flatrate)
+export async function getTVWatchProvidersFull(id: number): Promise<{
+  flatrate?: WatchProvider[];
+  rent?: WatchProvider[];
+  buy?: WatchProvider[];
+}> {
+  try {
+    const data = await fetchFromTMDB(`/tv/${id}/watch/providers`);
+    if (data.results && data.results.TR) {
+      return {
+        flatrate: data.results.TR.flatrate || [],
+        rent: data.results.TR.rent || [],
+        buy: data.results.TR.buy || [],
+      };
+    }
+    return {};
+  } catch (error) {
+    console.error('Watch providers yüklenemedi:', error);
+    return {};
+  }
+}
+
 // Kişi detaylarını getir
 export async function getPersonDetails(id: number): Promise<PersonDetails> {
   return await fetchFromTMDB(`/person/${id}`);
@@ -271,6 +341,16 @@ export async function getPersonDetails(id: number): Promise<PersonDetails> {
 // Kişinin filmografisini getir
 export async function getPersonCredits(id: number): Promise<PersonCredits> {
   return await fetchFromTMDB(`/person/${id}/combined_credits`);
+}
+
+// Film videolarını getir
+export async function getMovieVideos(id: number): Promise<MovieVideos> {
+  return await fetchFromTMDB(`/movie/${id}/videos`);
+}
+
+// TV dizisi videolarını getir
+export async function getTVVideos(id: number): Promise<TVVideos> {
+  return await fetchFromTMDB(`/tv/${id}/videos`);
 }
 
 // Film türlerini getir

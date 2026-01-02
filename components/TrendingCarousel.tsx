@@ -71,34 +71,36 @@ export default function TrendingCarousel({ trendingToday, trendingWeek }: Trendi
   }
 
   return (
-    <section className="mb-12">
-      <div className="flex items-center justify-between mb-4 px-4">
-        <h2 className="text-3xl font-bold text-white">Trending</h2>
-        <div className="flex gap-2 bg-gray-800 rounded-lg p-1">
-          <button
-            onClick={() => setActiveTab('day')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition ${
-              activeTab === 'day'
-                ? 'bg-primary-600 text-white'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Bugün
-          </button>
-          <button
-            onClick={() => setActiveTab('week')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition ${
-              activeTab === 'week'
-                ? 'bg-primary-600 text-white'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Bu Hafta
-          </button>
+    <section className="mb-12 w-full">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-3xl font-bold text-white">Trendler</h2>
+          <div className="flex gap-2 bg-gray-800 rounded-lg p-1">
+            <button
+              onClick={() => setActiveTab('day')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                activeTab === 'day'
+                  ? 'bg-primary-600 text-white'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Bugün
+            </button>
+            <button
+              onClick={() => setActiveTab('week')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                activeTab === 'week'
+                  ? 'bg-primary-600 text-white'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Bu Hafta
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="relative px-4">
+      <div className="relative w-full">
         {/* Sol Ok Butonu */}
         <button
           onClick={() => scroll('left')}
