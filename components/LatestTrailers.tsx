@@ -99,7 +99,7 @@ export default function LatestTrailers() {
   return (
     <>
       <section className="mb-12 bg-gradient-to-br from-orange-600 via-red-600 to-pink-600 py-12 w-full">
-        <div className="w-full px-4">
+        <div className="w-full px-6 md:px-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-3xl md:text-4xl font-bold text-white">Son Fragmanlar</h2>
             <div className="flex gap-2 flex-wrap">
@@ -123,7 +123,7 @@ export default function LatestTrailers() {
             {/* Sol Ok Butonu */}
             <button
               onClick={() => scroll('left')}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 shadow-lg transition-all hover:scale-110 group"
+              className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 shadow-lg transition-all hover:scale-110 group"
               aria-label="Sol"
             >
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,7 +134,7 @@ export default function LatestTrailers() {
             {/* Sağ Ok Butonu */}
             <button
               onClick={() => scroll('right')}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 shadow-lg transition-all hover:scale-110 group"
+              className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 shadow-lg transition-all hover:scale-110 group"
               aria-label="Sağ"
             >
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -150,7 +150,7 @@ export default function LatestTrailers() {
                 msOverflowStyle: 'none'
               }}
             >
-              <div className="flex gap-4 px-12" style={{ width: 'max-content' }}>
+              <div className="flex gap-4 px-4 md:px-6" style={{ width: 'max-content' }}>
                 {trailers.map((trailer) => {
                   const date = trailer.release_date || trailer.first_air_date;
                   const url = trailer.media_type === 'movie'

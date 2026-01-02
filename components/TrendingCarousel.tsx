@@ -72,9 +72,9 @@ export default function TrendingCarousel({ trendingToday, trendingWeek }: Trendi
 
   return (
     <section className="mb-12 w-full">
-      <div className="container mx-auto px-4">
+      <div className="w-full px-6 md:px-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-3xl font-bold text-white">Trendler</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-white">Trendler</h2>
           <div className="flex gap-2 bg-gray-800 rounded-lg p-1">
             <button
               onClick={() => setActiveTab('day')}
