@@ -42,7 +42,7 @@ export default function PersonCreditsList({ credits }: PersonCreditsListProps) {
     <div className="mt-12">
       <h2 className="text-3xl font-bold mb-6 text-white">Bilinen Yapımlar</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        {displayedCredits.map((item) => {
+        {displayedCredits.map((item, index) => {
           const title = 'title' in item ? item.title : item.name;
           const date = 'release_date' in item ? item.release_date : item.first_air_date;
           const url = item.media_type === 'movie' 
@@ -51,7 +51,7 @@ export default function PersonCreditsList({ credits }: PersonCreditsListProps) {
           const character = item.character || item.job;
 
           return (
-            <Link key={`${item.media_type}-${item.id}`} href={url} className="group">
+            <Link key={`${item.media_type}-${item.id}-${index}`} href={url} className="group">
               <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800 mb-2">
                 <Image
                   src={getPosterUrl(item.poster_path)}
