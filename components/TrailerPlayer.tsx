@@ -69,9 +69,9 @@ export default function TrailerPlayer({ trailerKey, title }: TrailerPlayerProps)
             zIndex: 99999,
           }}
         >
-          {/* Pop-up Modal Container - Büyük ve merkezde */}
+          {/* Pop-up Modal Container - Daha büyük ve merkezde */}
           <div 
-            className="relative bg-black rounded-lg shadow-2xl overflow-hidden w-full max-w-[1600px] aspect-video"
+            className="relative bg-black rounded-lg shadow-2xl overflow-hidden w-full max-w-[1920px] aspect-video"
             onClick={(e) => e.stopPropagation()}
             style={{ 
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',

@@ -203,12 +203,9 @@ export default function LatestTrailers() {
                       </div>
 
                       <Link href={url} className="block">
-                        <h3 className="text-white font-semibold text-lg mb-1 line-clamp-1 group-hover:text-teal-400 transition drop-shadow-lg">
+                        <h3 className="text-white font-semibold text-lg line-clamp-1 group-hover:text-teal-400 transition drop-shadow-lg">
                           {trailer.title}
                         </h3>
-                        <p className="text-white/90 text-sm line-clamp-2 drop-shadow-md">
-                          {trailer.overview || trailer.trailer_name || ''}
-                        </p>
                       </Link>
                     </div>
                   );
@@ -236,9 +233,9 @@ export default function LatestTrailers() {
             zIndex: 99999,
           }}
         >
-          {/* Pop-up Modal Container - Büyük ve merkezde */}
+          {/* Pop-up Modal Container - Daha büyük ve merkezde */}
           <div 
-            className="relative bg-black rounded-lg shadow-2xl overflow-hidden w-full max-w-[1600px] aspect-video"
+            className="relative bg-black rounded-lg shadow-2xl overflow-hidden w-full max-w-[1920px] aspect-video"
             onClick={(e) => e.stopPropagation()}
             style={{ 
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
