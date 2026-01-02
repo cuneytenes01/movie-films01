@@ -168,10 +168,10 @@ export default function TrendingCarousel({ trendingToday, trendingWeek }: Trendi
                 </div>
                 {/* Title Below Poster */}
                 <div className="px-1">
-                  <p className="text-white font-semibold text-base line-clamp-1 group-hover:text-primary-400 transition">
+                  <p className="text-white font-semibold text-lg md:text-base line-clamp-1 group-hover:text-primary-400 transition">
                     {getItemTitle(item)}
                   </p>
-                  <p className="text-gray-200 dark:text-gray-300 text-sm font-medium mt-1.5">{getItemDate(item)}</p>
+                  <p className="text-gray-200 dark:text-gray-300 text-base md:text-sm font-medium mt-1.5">{getItemDate(item)}</p>
                 </div>
               </Link>
             ))}

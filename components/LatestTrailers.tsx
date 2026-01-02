@@ -190,7 +190,7 @@ export default function LatestTrailers() {
                       )}
 
                       <Link href={url} className="block">
-                        <h3 className="text-white font-semibold text-xl line-clamp-1 group-hover:text-teal-400 transition drop-shadow-lg">
+                        <h3 className="text-white font-semibold text-2xl md:text-xl line-clamp-1 group-hover:text-teal-400 transition drop-shadow-lg">
                           {trailer.title}
                         </h3>
                       </Link>

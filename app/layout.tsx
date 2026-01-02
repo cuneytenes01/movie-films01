@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import ThemeToggle from '@/components/ThemeToggle'
+import MobileMenu from '@/components/MobileMenu'
 
 export const metadata: Metadata = {
   title: 'DİZİYOO - Film ve Dizi Kataloğu',
@@ -72,12 +73,20 @@ export default function RootLayout({
                   </span>
                 </a>
                 <div className="flex gap-3 md:gap-4 items-center text-sm md:text-base">
-                  <a href="/" className="text-gray-900 dark:text-white hover:text-primary-400 transition font-medium">Ana Sayfa</a>
-                  <a href="/movies" className="text-gray-900 dark:text-white hover:text-primary-400 transition font-medium">Filmler</a>
-                  <a href="/tv" className="text-gray-900 dark:text-white hover:text-primary-400 transition font-medium">Diziler</a>
-                  <a href="/tv/on-the-air" className="text-gray-900 dark:text-white hover:text-primary-400 transition font-medium">Yayında</a>
-                  <a href="/yayin-akisi" className="text-gray-900 dark:text-white hover:text-primary-400 transition font-medium">Yayın Akışı</a>
-                  <ThemeToggle />
+                  {/* Desktop Navigation - Sadece web'de görünür */}
+                  <div className="hidden md:flex gap-3 md:gap-4 items-center">
+                    <a href="/" className="text-gray-900 dark:text-white hover:text-primary-400 transition font-medium">Ana Sayfa</a>
+                    <a href="/movies" className="text-gray-900 dark:text-white hover:text-primary-400 transition font-medium">Filmler</a>
+                    <a href="/tv" className="text-gray-900 dark:text-white hover:text-primary-400 transition font-medium">Diziler</a>
+                    <a href="/tv/on-the-air" className="text-gray-900 dark:text-white hover:text-primary-400 transition font-medium">Yayında</a>
+                    <a href="/yayin-akisi" className="text-gray-900 dark:text-white hover:text-primary-400 transition font-medium">Yayın Akışı</a>
+                  </div>
+                  {/* Theme Toggle - Desktop'ta görünür */}
+                  <div className="hidden md:block">
+                    <ThemeToggle />
+                  </div>
+                  {/* Mobile Menu - Sadece mobilde görünür */}
+                  <MobileMenu />
                 </div>
               </div>
             </div>
