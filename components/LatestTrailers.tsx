@@ -254,7 +254,7 @@ export default function LatestTrailers() {
                 e.stopPropagation();
                 closeTrailer();
               }}
-              className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center transition-colors"
+              className="absolute top-4 right-4 z-50 w-12 h-12 bg-black/80 hover:bg-black/90 rounded-full flex items-center justify-center transition-colors shadow-2xl border-2 border-white/20"
             >
               <svg
                 className="w-7 h-7 text-white"
