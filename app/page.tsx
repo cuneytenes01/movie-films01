@@ -172,7 +172,10 @@ export default async function Home() {
           <section className="mb-12 bg-gradient-to-br from-amber-600 via-yellow-600 to-orange-500 py-8">
             <div className="container mx-auto px-4">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-white drop-shadow-lg">En Yüksek Puanlı Filmler</h2>
+                <h2 className="text-3xl font-bold text-white drop-shadow-lg">
+                  <span className="block md:inline">En Yüksek</span>
+                  <span className="block md:inline"> Puanlı Filmler</span>
+                </h2>
                 <Link href="/movies" className="text-white/90 hover:text-white transition font-semibold bg-white/20 px-4 py-2 rounded-lg backdrop-blur-sm">
                   Tümünü Gör →
                 </Link>
@@ -210,7 +213,10 @@ export default async function Home() {
           <section className="bg-gradient-to-br from-purple-600 via-violet-600 to-fuchsia-600 py-8">
             <div className="container mx-auto px-4">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-white drop-shadow-lg">En Yüksek Puanlı Diziler</h2>
+                <h2 className="text-3xl font-bold text-white drop-shadow-lg">
+                  <span className="block md:inline">En Yüksek</span>
+                  <span className="block md:inline"> Puanlı Diziler</span>
+                </h2>
                 <Link href="/tv" className="text-white/90 hover:text-white transition font-semibold bg-white/20 px-4 py-2 rounded-lg backdrop-blur-sm">
                   Tümünü Gör →
                 </Link>

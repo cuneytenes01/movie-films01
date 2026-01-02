@@ -133,7 +133,7 @@ export default function TrendingCarousel({ trendingToday, trendingWeek }: Trendi
 
         <div 
           ref={scrollContainerRef}
-          className="overflow-x-auto scrollbar-hide pb-4"
+          className="overflow-x-auto scrollbar-hide pb-2"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           <div className="flex gap-4" style={{ width: 'max-content' }}>
