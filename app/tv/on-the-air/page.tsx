@@ -131,7 +131,6 @@ export default function OnTheAirPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-4xl font-bold mb-2 text-white">Şu Anda Yayında Olan TV Dizileri</h1>
-          <p className="text-gray-400">Şu anda yayında olan popüler TV dizilerini keşfedin</p>
         </div>
 
         {/* Filters at the top */}

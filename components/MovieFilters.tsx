@@ -90,11 +90,12 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
   // Initialize filters on mount
   useEffect(() => {
     onFilterChange(filters)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Close dropdowns when clicking outside
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    function handleClickOutside(event: MouseEvent | TouchEvent) {
       if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
         setExpandedSections({
           sort: false,
@@ -107,8 +108,10 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
     }
 
     document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('touchstart', handleClickOutside)
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('touchstart', handleClickOutside)
     }
   }, [])
 
@@ -165,9 +168,10 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
   return (
     <div ref={filterRef} className="w-full bg-gradient-to-br from-purple-500 via-purple-600 to-violet-700 rounded-xl shadow-lg border-2 border-purple-400 mb-6 overflow-visible">
       {/* Header with Filters in one line */}
-      <div className="bg-transparent px-6 py-4">
-        <div className="flex items-center gap-4 flex-wrap">
-          <div className="flex items-center gap-3 flex-shrink-0">
+      <div className="bg-transparent px-3 md:px-6 py-2 md:py-4">
+        <div className="flex items-center gap-2 md:gap-4">
+          {/* Filtreler başlığı - Sadece desktop'ta görünür */}
+          <div className="hidden md:flex items-center gap-3 flex-shrink-0">
             <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
               <SettingsIcon />
             </div>
@@ -181,13 +185,31 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
             )}
           </div>
 
-          {/* Filter Buttons */}
-          <div className="flex flex-wrap gap-3 flex-1">
+          {/* Aktif filtre sayısı - Sadece mobilde görünür */}
+          {activeFiltersCount > 0 && (
+            <div className="md:hidden flex items-center gap-2">
+              <span className="px-2.5 py-1 bg-white/30 backdrop-blur-sm text-white text-xs font-semibold rounded-full border border-white/50">
+                {activeFiltersCount} aktif
+              </span>
+            </div>
+          )}
+
+          {/* Filter Buttons - Yatay scroll mobilde */}
+          <div className="flex gap-2 md:gap-3 flex-1 overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {/* Sort */}
-          <div className="flex-shrink-0 relative">
+          <div className="flex-shrink-0 relative z-10">
             <button
-              onClick={() => toggleSection('sort')}
-              className={`group flex items-center gap-2 px-5 py-2.5 rounded-lg transition-all duration-200 font-medium text-sm shadow-lg border-2 ${
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                toggleSection('sort')
+              }}
+              onTouchEnd={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                toggleSection('sort')
+              }}
+              className={`group flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 rounded-lg transition-all duration-200 font-medium text-xs md:text-sm shadow-lg border-2 flex-shrink-0 h-[42px] md:h-auto whitespace-nowrap ${
                 expandedSections.sort
                   ? 'bg-white text-purple-600 border-white shadow-xl scale-105'
                   : filters.sortBy !== 'popularity.desc'
@@ -196,7 +218,8 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
               }`}
             >
               <SortIcon />
-              <span>{getSelectedSortLabel()}</span>
+              <span className="hidden sm:inline">{getSelectedSortLabel()}</span>
+              <span className="sm:hidden">Sırala</span>
               <svg 
                 className={`w-3 h-3 transition-transform duration-200 ${expandedSections.sort ? 'rotate-180' : ''}`}
                 fill="none" 
@@ -207,12 +230,20 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
               </svg>
             </button>
             {expandedSections.sort && (
-              <div className="absolute mt-2 left-0 z-50 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-primary-200 rounded-xl shadow-2xl p-4 min-w-[240px] animate-[fadeIn_0.2s_ease-in-out]">
+              <div className="absolute mt-2 left-0 z-[100] bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-primary-200 rounded-xl shadow-2xl p-4 min-w-[240px] animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
                 <div className="space-y-1">
                   {SORT_OPTIONS.map(option => (
                     <button
                       key={option.value}
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        e.preventDefault()
+                        handleFilterChange('sortBy', option.value)
+                        setExpandedSections(prev => ({ ...prev, sort: false }))
+                      }}
+                      onTouchEnd={(e) => {
+                        e.stopPropagation()
+                        e.preventDefault()
                         handleFilterChange('sortBy', option.value)
                         setExpandedSections(prev => ({ ...prev, sort: false }))
                       }}
@@ -231,10 +262,19 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
           </div>
 
           {/* Genres */}
-          <div className="flex-shrink-0 relative">
+          <div className="flex-shrink-0 relative z-10">
             <button
-              onClick={() => toggleSection('genres')}
-              className={`group flex items-center gap-2 px-5 py-2.5 rounded-lg transition-all duration-200 font-medium text-sm shadow-lg border-2 ${
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                toggleSection('genres')
+              }}
+              onTouchEnd={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                toggleSection('genres')
+              }}
+              className={`group flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 rounded-lg transition-all duration-200 font-medium text-xs md:text-sm shadow-lg border-2 flex-shrink-0 h-[42px] md:h-auto whitespace-nowrap ${
                 expandedSections.genres
                   ? 'bg-white text-purple-600 border-white shadow-xl scale-105'
                   : filters.selectedGenres.length > 0
@@ -243,7 +283,8 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
               }`}
             >
               <GenreIcon />
-              <span>Türler</span>
+              <span className="hidden sm:inline">Türler</span>
+              <span className="sm:hidden">Tür</span>
               {filters.selectedGenres.length > 0 && (
                 <span className="bg-purple-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
                   {filters.selectedGenres.length}
@@ -259,12 +300,21 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
               </svg>
             </button>
             {expandedSections.genres && (
-              <div className="absolute mt-2 left-0 z-50 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl shadow-2xl p-4 max-w-md max-h-80 overflow-y-auto animate-[fadeIn_0.2s_ease-in-out]">
+              <div className="absolute mt-2 left-0 z-[100] bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl shadow-2xl p-4 max-w-md max-h-80 overflow-y-auto animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
                 <div className="flex flex-wrap gap-2.5">
                   {genres.map(genre => (
                     <button
                       key={genre.id}
-                      onClick={() => handleGenreToggle(genre.id)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        e.preventDefault()
+                        handleGenreToggle(genre.id)
+                      }}
+                      onTouchEnd={(e) => {
+                        e.stopPropagation()
+                        e.preventDefault()
+                        handleGenreToggle(genre.id)
+                      }}
                       className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 min-w-[100px] text-center ${
                         filters.selectedGenres.includes(genre.id)
                           ? 'bg-purple-600 text-white shadow-lg scale-105 border-2 border-purple-700'
@@ -280,10 +330,19 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
           </div>
 
           {/* Dates */}
-          <div className="flex-shrink-0 relative">
+          <div className="flex-shrink-0 relative z-10">
             <button
-              onClick={() => toggleSection('dates')}
-              className={`group flex items-center gap-2 px-5 py-2.5 rounded-lg transition-all duration-200 font-medium text-sm shadow-lg border-2 ${
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                toggleSection('dates')
+              }}
+              onTouchEnd={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                toggleSection('dates')
+              }}
+              className={`group flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 rounded-lg transition-all duration-200 font-medium text-xs md:text-sm shadow-lg border-2 flex-shrink-0 h-[42px] md:h-auto whitespace-nowrap ${
                 expandedSections.dates
                   ? 'bg-white text-purple-600 border-white shadow-xl scale-105'
                   : filters.releaseDateFrom || filters.releaseDateTo
@@ -292,7 +351,8 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
               }`}
             >
               <CalendarIcon />
-              <span>Tarihler</span>
+              <span className="hidden sm:inline">Tarihler</span>
+              <span className="sm:hidden">Tarih</span>
               <svg 
                 className={`w-3 h-3 transition-transform duration-200 ${expandedSections.dates ? 'rotate-180' : ''}`}
                 fill="none" 
@@ -303,7 +363,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
               </svg>
             </button>
             {expandedSections.dates && (
-              <div className="absolute mt-2 left-0 z-50 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl shadow-2xl p-5 min-w-[340px] animate-[fadeIn_0.2s_ease-in-out]">
+              <div className="absolute mt-2 left-0 z-[100] bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl shadow-2xl p-5 min-w-[340px] animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
                 <div className="space-y-5">
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-3 text-sm flex items-center gap-2">
@@ -316,7 +376,11 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
                         <input
                           type="date"
                           value={filters.releaseDateFrom}
-                          onChange={(e) => handleFilterChange('releaseDateFrom', e.target.value)}
+                          onChange={(e) => {
+                            e.stopPropagation()
+                            handleFilterChange('releaseDateFrom', e.target.value)
+                          }}
+                          onClick={(e) => e.stopPropagation()}
                           className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                         />
                       </div>
@@ -325,7 +389,11 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
                         <input
                           type="date"
                           value={filters.releaseDateTo}
-                          onChange={(e) => handleFilterChange('releaseDateTo', e.target.value)}
+                          onChange={(e) => {
+                            e.stopPropagation()
+                            handleFilterChange('releaseDateTo', e.target.value)
+                          }}
+                          onClick={(e) => e.stopPropagation()}
                           className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                         />
                       </div>
@@ -337,10 +405,19 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
           </div>
 
           {/* Ratings */}
-          <div className="flex-shrink-0 relative">
+          <div className="flex-shrink-0 relative z-10">
             <button
-              onClick={() => toggleSection('ratings')}
-              className={`group flex items-center gap-2 px-5 py-2.5 rounded-lg transition-all duration-200 font-medium text-sm shadow-lg border-2 ${
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                toggleSection('ratings')
+              }}
+              onTouchEnd={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                toggleSection('ratings')
+              }}
+              className={`group flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 rounded-lg transition-all duration-200 font-medium text-xs md:text-sm shadow-lg border-2 flex-shrink-0 h-[42px] md:h-auto whitespace-nowrap ${
                 expandedSections.ratings
                   ? 'bg-white text-purple-600 border-white shadow-xl scale-105'
                   : filters.minRating > 0 || filters.minVotes > 0
@@ -349,7 +426,8 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
               }`}
             >
               <StarIcon />
-              <span>Puan & Oy</span>
+              <span className="hidden sm:inline">Puan & Oy</span>
+              <span className="sm:hidden">Puan</span>
               <svg 
                 className={`w-3 h-3 transition-transform duration-200 ${expandedSections.ratings ? 'rotate-180' : ''}`}
                 fill="none" 
@@ -360,7 +438,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
               </svg>
             </button>
             {expandedSections.ratings && (
-              <div className="absolute mt-2 left-0 z-50 bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl shadow-2xl p-5 min-w-[280px] animate-[fadeIn_0.2s_ease-in-out]">
+              <div className="absolute mt-2 left-0 z-[100] bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl shadow-2xl p-5 min-w-[280px] animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
                 <div className="space-y-5">
                   <div>
                     <div className="flex items-center justify-between mb-3">
@@ -378,7 +456,11 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
                       max="10"
                       step="0.5"
                       value={filters.minRating}
-                      onChange={(e) => handleFilterChange('minRating', parseFloat(e.target.value))}
+                      onChange={(e) => {
+                        e.stopPropagation()
+                        handleFilterChange('minRating', parseFloat(e.target.value))
+                      }}
+                      onClick={(e) => e.stopPropagation()}
                       className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
                       style={{
                         background: `linear-gradient(to right, #2563eb 0%, #2563eb ${(filters.minRating / 10) * 100}%, #e5e7eb ${(filters.minRating / 10) * 100}%, #e5e7eb 100%)`
@@ -395,7 +477,11 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
                       type="number"
                       min="0"
                       value={filters.minVotes}
-                      onChange={(e) => handleFilterChange('minVotes', parseInt(e.target.value) || 0)}
+                      onChange={(e) => {
+                        e.stopPropagation()
+                        handleFilterChange('minVotes', parseInt(e.target.value) || 0)
+                      }}
+                      onClick={(e) => e.stopPropagation()}
                       className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                       placeholder="0"
                     />
@@ -406,10 +492,19 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
           </div>
 
           {/* Other Filters */}
-          <div className="flex-shrink-0 relative">
+          <div className="flex-shrink-0 relative z-10">
             <button
-              onClick={() => toggleSection('other')}
-              className={`group flex items-center gap-2 px-5 py-2.5 rounded-lg transition-all duration-200 font-medium text-sm shadow-lg border-2 ${
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                toggleSection('other')
+              }}
+              onTouchEnd={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                toggleSection('other')
+              }}
+              className={`group flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 rounded-lg transition-all duration-200 font-medium text-xs md:text-sm shadow-lg border-2 flex-shrink-0 h-[42px] md:h-auto whitespace-nowrap ${
                 expandedSections.other
                   ? 'bg-white text-purple-600 border-white shadow-xl scale-105'
                   : filters.runtimeMin > 0 || filters.runtimeMax < 300
@@ -429,7 +524,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
               </svg>
             </button>
             {expandedSections.other && (
-              <div className="absolute mt-2 left-0 z-50 bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-xl shadow-2xl p-5 min-w-[320px] animate-[fadeIn_0.2s_ease-in-out]">
+              <div className="absolute mt-2 left-0 z-[100] bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-xl shadow-2xl p-5 min-w-[320px] animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
                 <div className="space-y-5">
                   <div>
                     <label className="block text-sm font-semibold text-gray-900 mb-3">Film Süresi (dakika)</label>
@@ -440,7 +535,11 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
                           type="number"
                           min="0"
                           value={filters.runtimeMin}
-                          onChange={(e) => handleFilterChange('runtimeMin', parseInt(e.target.value) || 0)}
+                          onChange={(e) => {
+                            e.stopPropagation()
+                            handleFilterChange('runtimeMin', parseInt(e.target.value) || 0)
+                          }}
+                          onClick={(e) => e.stopPropagation()}
                           className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                           placeholder="0"
                         />
@@ -452,7 +551,11 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
                           min="0"
                           max="300"
                           value={filters.runtimeMax}
-                          onChange={(e) => handleFilterChange('runtimeMax', parseInt(e.target.value) || 300)}
+                          onChange={(e) => {
+                            e.stopPropagation()
+                            handleFilterChange('runtimeMax', parseInt(e.target.value) || 300)
+                          }}
+                          onClick={(e) => e.stopPropagation()}
                           className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                           placeholder="300"
                         />
@@ -468,10 +571,11 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
           {activeFiltersCount > 0 && (
             <button
               onClick={resetFilters}
-              className="flex items-center gap-2 px-4 py-2 text-sm bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 rounded-lg transition-all duration-200 font-medium ml-auto shadow-md border-2 border-white"
+              className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 text-xs md:text-sm bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 rounded-lg transition-all duration-200 font-medium ml-auto md:ml-0 shadow-md border-2 border-white flex-shrink-0"
             >
               <CloseIcon />
-              <span>Tümünü Temizle</span>
+              <span className="hidden sm:inline">Tümünü Temizle</span>
+              <span className="sm:hidden">Temizle</span>
             </button>
           )}
         </div>
