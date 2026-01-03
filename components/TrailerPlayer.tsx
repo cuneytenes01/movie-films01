@@ -77,13 +77,13 @@ export default function TrailerPlayer({ trailerKey, title }: TrailerPlayerProps)
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
             }}
           >
-            {/* Kapat Butonu - Sağ üst köşede, modal içinde */}
+            {/* Kapat Butonu - Sağ üst köşede, modal içinde - Sadece desktop'ta görünür */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setIsOpen(false);
               }}
-              className="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-all shadow-2xl border-2 border-white/40 hover:scale-110 z-50"
+              className="hidden md:flex absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full items-center justify-center transition-all shadow-2xl border-2 border-white/40 hover:scale-110 z-50"
               aria-label="Kapat"
             >
               <svg
@@ -97,7 +97,7 @@ export default function TrailerPlayer({ trailerKey, title }: TrailerPlayerProps)
               </svg>
             </button>
             
-            {/* Paylaş Butonu - Kapat butonunun yanında (solunda) */}
+            {/* Paylaş Butonu - Kapat butonunun yanında (solunda) - Sadece desktop'ta görünür */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -112,7 +112,7 @@ export default function TrailerPlayer({ trailerKey, title }: TrailerPlayerProps)
                   alert('Link kopyalandı!');
                 }
               }}
-              className="absolute top-4 right-20 w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all shadow-2xl border-2 border-white/40 hover:scale-110 z-50"
+              className="hidden md:flex absolute top-4 right-20 w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full items-center justify-center transition-all shadow-2xl border-2 border-white/40 hover:scale-110 z-50"
               aria-label="Paylaş"
             >
               <svg

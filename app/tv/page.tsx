@@ -127,8 +127,8 @@ export default function TVPage() {
   }, [filters])
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-900 overflow-visible">
+      <div className="container mx-auto px-4 py-8 overflow-visible">
         <div className="mb-6">
           <h1 className="text-4xl font-bold mb-2 text-white">TV Dizileri</h1>
         </div>

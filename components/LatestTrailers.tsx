@@ -101,7 +101,7 @@ export default function LatestTrailers() {
           </div>
         </div>
 
-        <div className="relative w-full px-6 md:px-8">
+        <div className="relative w-full px-4 md:px-8">
             {/* Sol Ok Butonu - Sadece desktop'ta görünür */}
             <button
               onClick={(e) => {
@@ -140,7 +140,7 @@ export default function LatestTrailers() {
                 msOverflowStyle: 'none'
               }}
             >
-              <div className="flex gap-4" style={{ width: 'max-content' }}>
+              <div className="flex gap-3 md:gap-4" style={{ width: 'max-content' }}>
                 {trailers.map((trailer) => {
                   const date = trailer.release_date || trailer.first_air_date;
                   const url = trailer.media_type === 'movie'
@@ -156,7 +156,7 @@ export default function LatestTrailers() {
                   return (
                     <div
                       key={`${trailer.media_type}-${trailer.id}`}
-                      className="flex-shrink-0 w-[85vw] md:w-80 group"
+                      className="flex-shrink-0 w-[75vw] md:w-80 group"
                     >
                       {trailer.trailer_key ? (
                         <button
@@ -182,7 +182,7 @@ export default function LatestTrailers() {
                               alt={trailer.title}
                               fill
                               className="object-cover"
-                              sizes="(max-width: 768px) 85vw, 320px"
+                              sizes="(max-width: 768px) 75vw, 320px"
                               unoptimized={trailer.poster_path === null && trailer.backdrop_path === null}
                             />
                           </div>
@@ -228,13 +228,13 @@ export default function LatestTrailers() {
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
             }}
           >
-            {/* Kapat Butonu - Sağ üst köşede, modal içinde */}
+            {/* Kapat Butonu - Sağ üst köşede, modal içinde - Sadece desktop'ta görünür */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 closeTrailer();
               }}
-              className="absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-all shadow-2xl border-2 border-white/40 hover:scale-110 z-50"
+              className="hidden md:flex absolute top-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full items-center justify-center transition-all shadow-2xl border-2 border-white/40 hover:scale-110 z-50"
               aria-label="Kapat"
             >
               <svg
@@ -248,7 +248,7 @@ export default function LatestTrailers() {
               </svg>
             </button>
             
-            {/* Paylaş Butonu - Kapat butonunun yanında (solunda) */}
+            {/* Paylaş Butonu - Kapat butonunun yanında (solunda) - Sadece desktop'ta görünür */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -263,7 +263,7 @@ export default function LatestTrailers() {
                   alert('Link kopyalandı!');
                 }
               }}
-              className="absolute top-4 right-20 w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all shadow-2xl border-2 border-white/40 hover:scale-110 z-50"
+              className="hidden md:flex absolute top-4 right-20 w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full items-center justify-center transition-all shadow-2xl border-2 border-white/40 hover:scale-110 z-50"
               aria-label="Paylaş"
             >
               <svg

@@ -166,7 +166,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
   }
 
   return (
-    <div ref={filterRef} className="w-full bg-gradient-to-br from-purple-500 via-purple-600 to-violet-700 rounded-xl shadow-lg border-2 border-purple-400 mb-6 overflow-visible">
+    <div ref={filterRef} className="w-full bg-gradient-to-br from-purple-500 via-purple-600 to-violet-700 rounded-xl shadow-lg border-2 border-purple-400 mb-6 overflow-visible relative">
       {/* Header with Filters in one line */}
       <div className="bg-transparent px-3 md:px-6 py-2 md:py-4">
         <div className="flex items-center gap-2 md:gap-4">
@@ -197,7 +197,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
           {/* Filter Buttons - Yatay scroll mobilde */}
           <div className="flex gap-2 md:gap-3 flex-1 overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {/* Sort */}
-          <div className="flex-shrink-0 relative z-10">
+          <div className="flex-shrink-0 relative z-[100]">
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -230,7 +230,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
               </svg>
             </button>
             {expandedSections.sort && (
-              <div className="absolute mt-2 left-0 z-[100] bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-primary-200 rounded-xl shadow-2xl p-4 min-w-[240px] animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
+              <div className="absolute mt-2 left-0 z-[9999] bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-primary-200 rounded-xl shadow-2xl p-4 min-w-[240px] max-w-[90vw] md:max-w-none animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
                 <div className="space-y-1">
                   {SORT_OPTIONS.map(option => (
                     <button
@@ -262,7 +262,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
           </div>
 
           {/* Genres */}
-          <div className="flex-shrink-0 relative z-10">
+          <div className="flex-shrink-0 relative z-[100]">
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -300,7 +300,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
               </svg>
             </button>
             {expandedSections.genres && (
-              <div className="absolute mt-2 left-0 z-[100] bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl shadow-2xl p-4 max-w-md max-h-80 overflow-y-auto animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
+              <div className="absolute mt-2 left-0 z-[9999] bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl shadow-2xl p-4 max-w-[90vw] md:max-w-md max-h-80 overflow-y-auto animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
                 <div className="flex flex-wrap gap-2.5">
                   {genres.map(genre => (
                     <button
@@ -330,7 +330,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
           </div>
 
           {/* Dates */}
-          <div className="flex-shrink-0 relative z-10">
+          <div className="flex-shrink-0 relative z-[100]">
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -363,7 +363,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
               </svg>
             </button>
             {expandedSections.dates && (
-              <div className="absolute mt-2 left-0 z-[100] bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl shadow-2xl p-5 min-w-[340px] animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
+              <div className="absolute mt-2 left-0 z-[9999] bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl shadow-2xl p-5 min-w-[90vw] md:min-w-[340px] animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
                 <div className="space-y-5">
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-3 text-sm flex items-center gap-2">
@@ -405,7 +405,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
           </div>
 
           {/* Ratings */}
-          <div className="flex-shrink-0 relative z-10">
+          <div className="flex-shrink-0 relative z-[100]">
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -438,7 +438,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
               </svg>
             </button>
             {expandedSections.ratings && (
-              <div className="absolute mt-2 left-0 z-[100] bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl shadow-2xl p-5 min-w-[280px] animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
+              <div className="absolute mt-2 left-0 z-[9999] bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl shadow-2xl p-5 min-w-[90vw] md:min-w-[280px] animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
                 <div className="space-y-5">
                   <div>
                     <div className="flex items-center justify-between mb-3">
@@ -492,7 +492,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
           </div>
 
           {/* Other Filters */}
-          <div className="flex-shrink-0 relative z-10">
+          <div className="flex-shrink-0 relative z-[100]">
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -524,7 +524,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
               </svg>
             </button>
             {expandedSections.other && (
-              <div className="absolute mt-2 left-0 z-[100] bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-xl shadow-2xl p-5 min-w-[320px] animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
+              <div className="absolute mt-2 left-0 z-[9999] bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-xl shadow-2xl p-5 min-w-[90vw] md:min-w-[320px] animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
                 <div className="space-y-5">
                   <div>
                     <label className="block text-sm font-semibold text-gray-900 mb-3">Film Süresi (dakika)</label>
