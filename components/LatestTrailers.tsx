@@ -156,7 +156,7 @@ export default function LatestTrailers() {
                   return (
                     <div
                       key={`${trailer.media_type}-${trailer.id}`}
-                      className="flex-shrink-0 w-[92vw] md:w-80 group"
+                      className="flex-shrink-0 w-[85vw] md:w-80 group"
                     >
                       {trailer.trailer_key ? (
                         <button
@@ -169,7 +169,7 @@ export default function LatestTrailers() {
                               alt={trailer.title}
                               fill
                               className="object-cover"
-                              sizes="(max-width: 768px) 92vw, 320px"
+                              sizes="(max-width: 768px) 85vw, 320px"
                               unoptimized={trailer.poster_path === null && trailer.backdrop_path === null}
                             />
                           </div>
@@ -182,7 +182,7 @@ export default function LatestTrailers() {
                               alt={trailer.title}
                               fill
                               className="object-cover"
-                              sizes="(max-width: 768px) 92vw, 320px"
+                              sizes="(max-width: 768px) 85vw, 320px"
                               unoptimized={trailer.poster_path === null && trailer.backdrop_path === null}
                             />
                           </div>

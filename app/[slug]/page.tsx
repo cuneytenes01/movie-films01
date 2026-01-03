@@ -301,53 +301,51 @@ export default async function ContentDetailPage({ params }: { params: Promise<{ 
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8 -mt-20 relative z-10">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Poster */}
-          <div className="flex-shrink-0 relative">
-            <div className="relative w-48 md:w-64 h-72 md:h-96 rounded-lg overflow-hidden shadow-2xl border-2 border-white/10">
-              <Image
-                src={getPosterUrl(content.poster_path, 'w500')}
-                alt={contentTitle}
-                fill
-                className="object-cover"
-                unoptimized
-              />
-            </div>
-            {/* Fragman İzle Butonu - Poster görselinin altında */}
-            {trailer && (
-              <div className="mt-4 flex justify-center">
-                <TrailerPlayer trailerKey={trailer.key} title={contentTitle} />
-              </div>
-            )}
-          </div>
-
+        <div className="flex flex-col gap-8">
           {/* Details */}
           <div className="flex-1 bg-gray-900/95 backdrop-blur-sm rounded-lg p-6 md:p-8 border border-white/10">
             <h1 className="text-3xl md:text-5xl font-bold mb-4 text-white">
               {contentTitle}
             </h1>
             
-            <div className="flex flex-wrap items-center gap-4 mb-6 text-white">
-              <span className="flex items-center gap-1 font-semibold">
-                <span className="text-yellow-400">⭐</span> {content.vote_average.toFixed(1)}
-                <span className="text-sm text-gray-400 font-normal">({content.vote_count.toLocaleString()} oy)</span>
-              </span>
-              <span className="text-gray-400">•</span>
-              <span>{releaseYear}</span>
-              {isMovie && content.runtime > 0 && (
-                <>
-                  <span className="text-gray-400">•</span>
-                  <span>{runtimeHours}s {runtimeMinutes}dk</span>
-                </>
-              )}
-              {!isMovie && (
-                <>
-                  <span className="text-gray-400">•</span>
-                  <span>{content.number_of_seasons} Sezon</span>
-                  <span className="text-gray-400">•</span>
-                  <span>{content.number_of_episodes} Bölüm</span>
-                </>
-              )}
+            {/* Poster ve Puanlama - Başlığın altında */}
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
+              {/* Poster */}
+              <div className="flex-shrink-0">
+                <div className="relative w-32 md:w-40 h-48 md:h-60 rounded-lg overflow-hidden shadow-2xl border-2 border-white/10">
+                  <Image
+                    src={getPosterUrl(content.poster_path, 'w500')}
+                    alt={contentTitle}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+              </div>
+              
+              {/* Puanlama ve Diğer Bilgiler */}
+              <div className="flex flex-wrap items-center gap-4 text-white">
+                <span className="flex items-center gap-1 font-semibold">
+                  <span className="text-yellow-400">⭐</span> {content.vote_average.toFixed(1)}
+                  <span className="text-sm text-gray-400 font-normal">({content.vote_count.toLocaleString()} oy)</span>
+                </span>
+                <span className="text-gray-400">•</span>
+                <span>{releaseYear}</span>
+                {isMovie && content.runtime > 0 && (
+                  <>
+                    <span className="text-gray-400">•</span>
+                    <span>{runtimeHours}s {runtimeMinutes}dk</span>
+                  </>
+                )}
+                {!isMovie && (
+                  <>
+                    <span className="text-gray-400">•</span>
+                    <span>{content.number_of_seasons} Sezon</span>
+                    <span className="text-gray-400">•</span>
+                    <span>{content.number_of_episodes} Bölüm</span>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Genres */}
