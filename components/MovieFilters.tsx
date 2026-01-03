@@ -393,7 +393,8 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
                     </button>
                   ))}
                 </div>
-              </div>
+              </div>,
+              document.body
             )}
           </div>
 
@@ -477,7 +478,8 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
                     </div>
                   </div>
                 </div>
-              </div>
+              </div>,
+              document.body
             )}
           </div>
 
@@ -573,7 +575,8 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
                     />
                   </div>
                 </div>
-              </div>
+              </div>,
+              document.body
             )}
           </div>
 
@@ -658,7 +661,8 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
                     </div>
                   </div>
                 </div>
-              </div>
+              </div>,
+              document.body
             )}
           </div>
           </div>
