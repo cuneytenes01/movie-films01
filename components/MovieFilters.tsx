@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 
 interface MovieFiltersProps {
   genres: { id: number; name: string }[]
@@ -85,13 +86,61 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
     ratings: false,
     other: false,
   })
+  const [buttonPositions, setButtonPositions] = useState<{ [key: string]: { top: number; left: number; width: number } | null }>({
+    sort: null,
+    genres: null,
+    dates: null,
+    ratings: null,
+    other: null,
+  })
+  const [mounted, setMounted] = useState(false)
   const filterRef = useRef<HTMLDivElement>(null)
+  const buttonRefs = {
+    sort: useRef<HTMLButtonElement>(null),
+    genres: useRef<HTMLButtonElement>(null),
+    dates: useRef<HTMLButtonElement>(null),
+    ratings: useRef<HTMLButtonElement>(null),
+    other: useRef<HTMLButtonElement>(null),
+  }
 
   // Initialize filters on mount
   useEffect(() => {
     onFilterChange(filters)
+    setMounted(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Calculate button positions when dropdowns open
+  useEffect(() => {
+    const updatePositions = () => {
+      const newPositions: { [key: string]: { top: number; left: number; width: number } | null } = {}
+      
+      Object.keys(buttonRefs).forEach((key) => {
+        const buttonRef = buttonRefs[key as keyof typeof buttonRefs]
+        if (expandedSections[key as keyof typeof expandedSections] && buttonRef.current) {
+          const rect = buttonRef.current.getBoundingClientRect()
+          newPositions[key] = {
+            top: rect.bottom + window.scrollY + 8,
+            left: rect.left + window.scrollX,
+            width: rect.width,
+          }
+        } else {
+          newPositions[key] = null
+        }
+      })
+      
+      setButtonPositions(newPositions)
+    }
+
+    updatePositions()
+    window.addEventListener('scroll', updatePositions, true)
+    window.addEventListener('resize', updatePositions)
+
+    return () => {
+      window.removeEventListener('scroll', updatePositions, true)
+      window.removeEventListener('resize', updatePositions)
+    }
+  }, [expandedSections])
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -199,6 +248,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
           {/* Sort */}
           <div className="flex-shrink-0 relative z-[100]">
             <button
+              ref={buttonRefs.sort}
               onClick={(e) => {
                 e.stopPropagation()
                 e.preventDefault()
@@ -229,8 +279,16 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            {expandedSections.sort && (
-              <div className="absolute mt-2 left-0 z-[9999] bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-primary-200 rounded-xl shadow-2xl p-4 min-w-[240px] max-w-[90vw] md:max-w-none animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
+            {expandedSections.sort && buttonPositions.sort && mounted && createPortal(
+              <div 
+                className="fixed z-[9999] bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-primary-200 rounded-xl shadow-2xl p-4 min-w-[240px] max-w-[90vw] md:max-w-none animate-[fadeIn_0.2s_ease-in-out]" 
+                style={{
+                  top: `${buttonPositions.sort.top}px`,
+                  left: `${buttonPositions.sort.left}px`,
+                  minWidth: `${Math.max(buttonPositions.sort.width, 240)}px`,
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
                 <div className="space-y-1">
                   {SORT_OPTIONS.map(option => (
                     <button
@@ -257,13 +315,15 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
                     </button>
                   ))}
                 </div>
-              </div>
+              </div>,
+              document.body
             )}
           </div>
 
           {/* Genres */}
           <div className="flex-shrink-0 relative z-[100]">
             <button
+              ref={buttonRefs.genres}
               onClick={(e) => {
                 e.stopPropagation()
                 e.preventDefault()
@@ -299,8 +359,16 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            {expandedSections.genres && (
-              <div className="absolute mt-2 left-0 z-[9999] bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl shadow-2xl p-4 max-w-[90vw] md:max-w-md max-h-80 overflow-y-auto animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
+            {expandedSections.genres && buttonPositions.genres && mounted && createPortal(
+              <div 
+                className="fixed z-[9999] bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl shadow-2xl p-4 max-w-[90vw] md:max-w-md max-h-80 overflow-y-auto animate-[fadeIn_0.2s_ease-in-out]" 
+                style={{
+                  top: `${buttonPositions.genres.top}px`,
+                  left: `${buttonPositions.genres.left}px`,
+                  minWidth: `${Math.max(buttonPositions.genres.width, 200)}px`,
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
                 <div className="flex flex-wrap gap-2.5">
                   {genres.map(genre => (
                     <button
@@ -332,6 +400,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
           {/* Dates */}
           <div className="flex-shrink-0 relative z-[100]">
             <button
+              ref={buttonRefs.dates}
               onClick={(e) => {
                 e.stopPropagation()
                 e.preventDefault()
@@ -362,8 +431,16 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            {expandedSections.dates && (
-              <div className="absolute mt-2 left-0 z-[9999] bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl shadow-2xl p-5 min-w-[90vw] md:min-w-[340px] animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
+            {expandedSections.dates && buttonPositions.dates && mounted && createPortal(
+              <div 
+                className="fixed z-[9999] bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl shadow-2xl p-5 min-w-[90vw] md:min-w-[340px] animate-[fadeIn_0.2s_ease-in-out]" 
+                style={{
+                  top: `${buttonPositions.dates.top}px`,
+                  left: `${buttonPositions.dates.left}px`,
+                  minWidth: `${Math.max(buttonPositions.dates.width, 340)}px`,
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
                 <div className="space-y-5">
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-3 text-sm flex items-center gap-2">
@@ -407,6 +484,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
           {/* Ratings */}
           <div className="flex-shrink-0 relative z-[100]">
             <button
+              ref={buttonRefs.ratings}
               onClick={(e) => {
                 e.stopPropagation()
                 e.preventDefault()
@@ -437,8 +515,16 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            {expandedSections.ratings && (
-              <div className="absolute mt-2 left-0 z-[9999] bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl shadow-2xl p-5 min-w-[90vw] md:min-w-[280px] animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
+            {expandedSections.ratings && buttonPositions.ratings && mounted && createPortal(
+              <div 
+                className="fixed z-[9999] bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl shadow-2xl p-5 min-w-[90vw] md:min-w-[280px] animate-[fadeIn_0.2s_ease-in-out]" 
+                style={{
+                  top: `${buttonPositions.ratings.top}px`,
+                  left: `${buttonPositions.ratings.left}px`,
+                  minWidth: `${Math.max(buttonPositions.ratings.width, 280)}px`,
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
                 <div className="space-y-5">
                   <div>
                     <div className="flex items-center justify-between mb-3">
@@ -494,6 +580,7 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
           {/* Other Filters */}
           <div className="flex-shrink-0 relative z-[100]">
             <button
+              ref={buttonRefs.other}
               onClick={(e) => {
                 e.stopPropagation()
                 e.preventDefault()
@@ -523,8 +610,16 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            {expandedSections.other && (
-              <div className="absolute mt-2 left-0 z-[9999] bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-xl shadow-2xl p-5 min-w-[90vw] md:min-w-[320px] animate-[fadeIn_0.2s_ease-in-out]" onClick={(e) => e.stopPropagation()}>
+            {expandedSections.other && buttonPositions.other && mounted && createPortal(
+              <div 
+                className="fixed z-[9999] bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-xl shadow-2xl p-5 min-w-[90vw] md:min-w-[320px] animate-[fadeIn_0.2s_ease-in-out]" 
+                style={{
+                  top: `${buttonPositions.other.top}px`,
+                  left: `${buttonPositions.other.left}px`,
+                  minWidth: `${Math.max(buttonPositions.other.width, 320)}px`,
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
                 <div className="space-y-5">
                   <div>
                     <label className="block text-sm font-semibold text-gray-900 mb-3">Film Süresi (dakika)</label>
