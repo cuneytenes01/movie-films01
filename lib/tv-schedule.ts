@@ -593,18 +593,11 @@ export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
 
     // Dizi listesini parse et - Format: **00**:00 Dizi Adı KANAL
     // Sadece bugünün dizileri bölümündeki li elementlerini al
-    let foundTodaySection = false;
     let foundTomorrowSection = false;
     
     $('li').each((index, element) => {
       const $el = $(element);
       const fullText = $el.text().trim();
-      
-      // "Bugünün Dizileri" başlığını bul
-      if (fullText.includes('Bugünün Dizileri')) {
-        foundTodaySection = true;
-        return; // continue
-      }
       
       // "Yarının Dizileri" başlığını bul - bundan sonra dur
       if (fullText.includes('Yarının Dizileri')) {
@@ -612,15 +605,17 @@ export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
         return false; // break
       }
       
-      // Eğer bugünün bölümüne henüz gelmediysek veya yarının bölümüne geldiysek, atla
-      if (!foundTodaySection || foundTomorrowSection) {
+      // Eğer yarının bölümüne geldiysek, atla
+      if (foundTomorrowSection) {
         return;
       }
       
       if (!fullText || fullText.length < 5) return;
       
-      // Zaman formatı kontrolü - eğer sadece tarih varsa (örn: "04 Jan2026"), atla
-      if (/^\d{1,2}\s+[A-Z][a-z]{2}\d{4}$/.test(fullText)) {
+      // Zaman formatı kontrolü - eğer sadece tarih varsa (örn: "04 Jan2026") veya başlık ise, atla
+      if (/^\d{1,2}\s+[A-Z][a-z]{2}\d{4}$/.test(fullText) || 
+          fullText.includes('Bugünün Dizileri') || 
+          fullText.includes('Yarının Dizileri')) {
         return;
       }
       
@@ -752,18 +747,11 @@ export async function getTodayMovies(): Promise<TodayMovieItem[]> {
 
     // Film listesini parse et - Format: **00**:00 Film Adı KANAL
     // Sadece bugünün filmleri bölümündeki li elementlerini al
-    let foundTodaySection = false;
     let foundTomorrowSection = false;
     
     $('li').each((index, element) => {
       const $el = $(element);
       const fullText = $el.text().trim();
-      
-      // "Bugünün Filmleri" başlığını bul
-      if (fullText.includes('Bugünün Filmleri')) {
-        foundTodaySection = true;
-        return; // continue
-      }
       
       // "Yarının Filmleri" başlığını bul - bundan sonra dur
       if (fullText.includes('Yarının Filmleri')) {
@@ -771,15 +759,17 @@ export async function getTodayMovies(): Promise<TodayMovieItem[]> {
         return false; // break
       }
       
-      // Eğer bugünün bölümüne henüz gelmediysek veya yarının bölümüne geldiysek, atla
-      if (!foundTodaySection || foundTomorrowSection) {
+      // Eğer yarının bölümüne geldiysek, atla
+      if (foundTomorrowSection) {
         return;
       }
       
       if (!fullText || fullText.length < 5) return;
       
-      // Zaman formatı kontrolü - eğer sadece tarih varsa (örn: "04 Jan2026"), atla
-      if (/^\d{1,2}\s+[A-Z][a-z]{2}\d{4}$/.test(fullText)) {
+      // Zaman formatı kontrolü - eğer sadece tarih varsa (örn: "04 Jan2026") veya başlık ise, atla
+      if (/^\d{1,2}\s+[A-Z][a-z]{2}\d{4}$/.test(fullText) || 
+          fullText.includes('Bugünün Filmleri') || 
+          fullText.includes('Yarının Filmleri')) {
         return;
       }
       
