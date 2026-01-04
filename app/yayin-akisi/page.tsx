@@ -1,32 +1,50 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { TVPlusProgram, formatTime } from '@/lib/tvplus';
+import { TVPlusProgram } from '@/lib/tvplus';
+import TVPlusSlider from '@/components/TVPlusSlider';
+
+type TabType = 'series' | 'movies' | 'documentaries' | 'sports' | 'football' | 'basketball';
 
 export default function YayinAkisiPage() {
-  const [movies, setMovies] = useState<TVPlusProgram[]>([]);
   const [series, setSeries] = useState<TVPlusProgram[]>([]);
+  const [movies, setMovies] = useState<TVPlusProgram[]>([]);
+  const [documentaries, setDocumentaries] = useState<TVPlusProgram[]>([]);
+  const [sports, setSports] = useState<TVPlusProgram[]>([]);
+  const [football, setFootball] = useState<TVPlusProgram[]>([]);
+  const [basketball, setBasketball] = useState<TVPlusProgram[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'movies' | 'series'>('movies');
+  const [activeTab, setActiveTab] = useState<TabType>('series');
 
   useEffect(() => {
     async function loadData() {
       try {
         setLoading(true);
         
-        const [moviesRes, seriesRes] = await Promise.all([
-          fetch('/api/yayin-akisi/movies'),
+        const [seriesRes, moviesRes, docsRes, sportsRes, footballRes, basketballRes] = await Promise.all([
           fetch('/api/yayin-akisi/series'),
+          fetch('/api/yayin-akisi/movies'),
+          fetch('/api/yayin-akisi/documentaries'),
+          fetch('/api/yayin-akisi/sports'),
+          fetch('/api/yayin-akisi/football'),
+          fetch('/api/yayin-akisi/basketball'),
         ]);
 
-        const [moviesData, seriesData] = await Promise.all([
-          moviesRes.json(),
+        const [seriesData, moviesData, docsData, sportsData, footballData, basketballData] = await Promise.all([
           seriesRes.json(),
+          moviesRes.json(),
+          docsRes.json(),
+          sportsRes.json(),
+          footballRes.json(),
+          basketballRes.json(),
         ]);
 
-        if (moviesData.success) setMovies(moviesData.data);
         if (seriesData.success) setSeries(seriesData.data);
+        if (moviesData.success) setMovies(moviesData.data);
+        if (docsData.success) setDocumentaries(docsData.data);
+        if (sportsData.success) setSports(sportsData.data);
+        if (footballData.success) setFootball(footballData.data);
+        if (basketballData.success) setBasketball(basketballData.data);
       } catch (error) {
         console.error('Veri yüklenemedi:', error);
       } finally {
@@ -37,24 +55,35 @@ export default function YayinAkisiPage() {
     loadData();
   }, []);
 
-  const currentData = activeTab === 'movies' ? movies : series;
+  const tabs = [
+    { id: 'series' as TabType, label: '📺 Diziler', count: series.length, color: 'from-purple-500 to-indigo-600' },
+    { id: 'movies' as TabType, label: '🎬 Filmler', count: movies.length, color: 'from-red-500 to-pink-600' },
+    { id: 'documentaries' as TabType, label: '📚 Belgeseller', count: documentaries.length, color: 'from-blue-500 to-cyan-600' },
+    { id: 'sports' as TabType, label: '⚽ Spor', count: sports.length, color: 'from-green-500 to-emerald-600' },
+    { id: 'football' as TabType, label: '⚽ Futbol', count: football.length, color: 'from-yellow-500 to-orange-600' },
+    { id: 'basketball' as TabType, label: '🏀 Basketbol', count: basketball.length, color: 'from-orange-500 to-red-600' },
+  ];
 
-  // Kanala göre grupla
-  const groupedByChannel = currentData.reduce((acc, item) => {
-    if (!acc[item.channelName]) {
-      acc[item.channelName] = {
-        logo: item.channelLogo,
-        programs: [],
-      };
+  const getSliderData = () => {
+    switch (activeTab) {
+      case 'series':
+        return { items: series.slice(0, 10), link: '/bugun-hangi-diziler-var', title: 'Bugünkü Diziler' };
+      case 'movies':
+        return { items: movies.slice(0, 10), link: '/bugun-hangi-filmler-var', title: 'Bugünkü Filmler' };
+      case 'documentaries':
+        return { items: documentaries.slice(0, 10), link: '/bugun-hangi-belgeseller-var', title: 'Bugünkü Belgeseller' };
+      case 'sports':
+        return { items: sports.slice(0, 10), link: '/bugun-hangi-spor-yayinlari-var', title: 'Bugünkü Spor Yayınları' };
+      case 'football':
+        return { items: football.slice(0, 10), link: '/bugun-hangi-futbol-maclari-var', title: 'Bugünkü Futbol Maçları' };
+      case 'basketball':
+        return { items: basketball.slice(0, 10), link: '/bugun-hangi-basketbol-maclari-var', title: 'Bugünkü Basketbol Maçları' };
+      default:
+        return { items: [], link: '', title: '' };
     }
-    acc[item.channelName].programs.push(item);
-    return acc;
-  }, {} as Record<string, { logo: string; programs: TVPlusProgram[] }>);
+  };
 
-  // Her kanalın programlarını saate göre sırala
-  Object.keys(groupedByChannel).forEach(channel => {
-    groupedByChannel[channel].programs.sort((a, b) => a.startTime - b.startTime);
-  });
+  const sliderData = getSliderData();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -67,7 +96,7 @@ export default function YayinAkisiPage() {
               📺 Yayın Akışı
             </h1>
             <p className="text-xl md:text-2xl text-gray-300 font-light">
-              Bugün TV'de ne var? Film ve dizi yayın akışı
+              Bugün TV'de ne var? Film, dizi, belgesel ve spor yayınları
             </p>
           </div>
         </div>
@@ -76,27 +105,20 @@ export default function YayinAkisiPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Tabs */}
         <div className="mb-8">
-          <div className="flex gap-3 justify-center">
-            <button
-              onClick={() => setActiveTab('movies')}
-              className={`px-8 py-4 rounded-xl font-bold text-base md:text-lg transition-all duration-300 transform hover:scale-105 ${
-                activeTab === 'movies'
-                  ? 'bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg shadow-red-500/50'
-                  : 'bg-white/10 text-gray-300 hover:bg-white/20'
-              }`}
-            >
-              🎬 Filmler ({movies.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('series')}
-              className={`px-8 py-4 rounded-xl font-bold text-base md:text-lg transition-all duration-300 transform hover:scale-105 ${
-                activeTab === 'series'
-                  ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/50'
-                  : 'bg-white/10 text-gray-300 hover:bg-white/20'
-              }`}
-            >
-              📺 Diziler ({series.length})
-            </button>
+          <div className="flex flex-wrap gap-3 justify-center">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-6 py-3 rounded-xl font-bold text-sm md:text-base transition-all duration-300 transform hover:scale-105 ${
+                  activeTab === tab.id
+                    ? `bg-gradient-to-r ${tab.color} text-white shadow-lg`
+                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                }`}
+              >
+                {tab.label} ({tab.count})
+              </button>
+            ))}
           </div>
         </div>
 
@@ -108,104 +130,15 @@ export default function YayinAkisiPage() {
           </div>
         )}
 
-        {/* Content */}
-        {!loading && currentData.length === 0 && (
-          <div className="text-center py-16 bg-white/5 rounded-2xl backdrop-blur-sm">
-            <p className="text-gray-400 text-lg">Bugün için veri bulunamadı.</p>
-          </div>
-        )}
-
-        {!loading && currentData.length > 0 && (
-          <div className="space-y-8">
-            {Object.entries(groupedByChannel).map(([channelName, { logo, programs }]) => (
-              <div
-                key={channelName}
-                className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-xl"
-              >
-                {/* Kanal Başlığı */}
-                <div className="flex items-center gap-4 mb-6 pb-4 border-b border-white/20">
-                  {logo && (
-                    <div className="relative w-16 h-16 flex-shrink-0">
-                      <Image
-                        src={logo}
-                        alt={channelName}
-                        fill
-                        className="object-contain rounded-lg"
-                        unoptimized
-                      />
-                    </div>
-                  )}
-                  <h2 className="text-white font-bold text-xl md:text-2xl">
-                    {channelName}
-                  </h2>
-                  <span className="ml-auto text-gray-400 text-sm">
-                    {programs.length} program
-                  </span>
-                </div>
-
-                {/* Programlar */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {programs.map((program) => (
-                    <div
-                      key={program.id}
-                      className="bg-white/5 rounded-xl overflow-hidden hover:bg-white/10 transition-all group"
-                    >
-                      {/* Program Görseli */}
-                      {program.image && (
-                        <div className="relative w-full h-48">
-                          <Image
-                            src={program.image}
-                            alt={program.name}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                            unoptimized
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                          
-                          {/* Saat */}
-                          <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-sm px-3 py-1 rounded-lg">
-                            <span className="text-green-400 font-bold text-sm">
-                              {formatTime(program.startTime)}
-                            </span>
-                          </div>
-
-                          {/* Yayın Tipi */}
-                          {program.broadcastType && (
-                            <div className="absolute top-3 right-3 bg-blue-500/80 backdrop-blur-sm px-2 py-1 rounded text-xs font-semibold text-white">
-                              {program.broadcastType}
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Program Bilgileri */}
-                      <div className="p-4">
-                        <h3 className="text-white font-bold text-base mb-2 line-clamp-2">
-                          {program.name}
-                        </h3>
-                        
-                        {program.introduce && (
-                          <p className="text-gray-400 text-sm line-clamp-3 mb-3">
-                            {program.introduce}
-                          </p>
-                        )}
-
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>{program.genres}</span>
-                          <span>
-                            {formatTime(program.startTime)} - {formatTime(program.endTime)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Slider */}
+        {!loading && (
+          <TVPlusSlider
+            items={sliderData.items}
+            viewAllLink={sliderData.link}
+            title={sliderData.title}
+          />
         )}
       </div>
     </div>
   );
 }
-
