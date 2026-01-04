@@ -595,6 +595,21 @@ export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
     // Sadece bugünün dizileri bölümündeki li elementlerini al
     let foundTodaySection = false;
     let foundTomorrowSection = false;
+    let hasTodayHeader = false;
+    
+    // Önce "Bugünün Dizileri" başlığının var olup olmadığını kontrol et
+    $('li').each((index, element) => {
+      const text = $(element).text().trim();
+      if (text.includes('Bugünün Dizileri')) {
+        hasTodayHeader = true;
+        return false; // break
+      }
+    });
+    
+    // Eğer "Bugünün Dizileri" başlığı yoksa, tüm li elementlerini çek (fallback)
+    if (!hasTodayHeader) {
+      foundTodaySection = true;
+    }
     
     $('li').each((index, element) => {
       const $el = $(element);
@@ -754,6 +769,21 @@ export async function getTodayMovies(): Promise<TodayMovieItem[]> {
     // Sadece bugünün filmleri bölümündeki li elementlerini al
     let foundTodaySection = false;
     let foundTomorrowSection = false;
+    let hasTodayHeader = false;
+    
+    // Önce "Bugünün Filmleri" başlığının var olup olmadığını kontrol et
+    $('li').each((index, element) => {
+      const text = $(element).text().trim();
+      if (text.includes('Bugünün Filmleri')) {
+        hasTodayHeader = true;
+        return false; // break
+      }
+    });
+    
+    // Eğer "Bugünün Filmleri" başlığı yoksa, tüm li elementlerini çek (fallback)
+    if (!hasTodayHeader) {
+      foundTodaySection = true;
+    }
     
     $('li').each((index, element) => {
       const $el = $(element);
