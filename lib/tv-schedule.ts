@@ -608,8 +608,6 @@ export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
       if (foundTomorrowSection) {
         return;
       }
-      const $el = $(element);
-      const fullText = $el.text().trim();
       
       if (!fullText || fullText.length < 5) return;
       
