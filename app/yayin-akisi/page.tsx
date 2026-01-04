@@ -264,52 +264,47 @@ export default function YayinAkisiPage() {
                 <p className="text-gray-400 text-lg">Bugün için film bulunamadı.</p>
               </div>
             ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {Object.entries(moviesByChannel).map(([channel, movies]) => (
-                  <div
-                    key={channel}
-                    className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-xl hover:bg-white/15 transition-all duration-300"
-                  >
-                    <div className="flex items-center gap-3 mb-4 pb-3 border-b border-white/20">
-                      {getChannelLogoUrl(channel) && (
-                        <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-white/10">
-                          <Image
-                            src={getChannelLogoUrl(channel)!}
-                            alt={channel}
-                            fill
-                            className="object-contain p-1"
-                            unoptimized
-                          />
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-white/20 shadow-xl">
+                <h2 className="text-white font-bold text-xl md:text-2xl mb-6 pb-4 border-b border-white/20">
+                  Bu Akşamki Filmler
+                </h2>
+                <div className="space-y-2">
+                  {todayMovies
+                    .sort((a, b) => {
+                      const [aHour, aMin] = a.time.split(':').map(Number);
+                      const [bHour, bMin] = b.time.split(':').map(Number);
+                      return aHour * 60 + aMin - (bHour * 60 + bMin);
+                    })
+                    .map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-4 py-3 px-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all border-b border-white/5 last:border-b-0"
+                      >
+                        <span className="text-red-400 font-bold text-base md:text-lg min-w-[70px] md:min-w-[80px]">
+                          {item.time}
+                        </span>
+                        <span className="text-white font-semibold text-sm md:text-base flex-1">
+                          {item.title}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {getChannelLogoUrl(item.channel) && (
+                            <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-lg overflow-hidden bg-white/10 hidden md:block">
+                              <Image
+                                src={getChannelLogoUrl(item.channel)!}
+                                alt={item.channel}
+                                fill
+                                className="object-contain p-1"
+                                unoptimized
+                              />
+                            </div>
+                          )}
+                          <span className="text-gray-300 text-xs md:text-sm font-medium min-w-[80px] md:min-w-[120px] text-right">
+                            {item.channel}
+                          </span>
                         </div>
-                      )}
-                      <h3 className="text-white font-bold text-lg">{channel}</h3>
-                    </div>
-                    <div className="space-y-3">
-                      {movies
-                        .sort((a, b) => {
-                          const [aHour, aMin] = a.time.split(':').map(Number);
-                          const [bHour, bMin] = b.time.split(':').map(Number);
-                          return aHour * 60 + aMin - (bHour * 60 + bMin);
-                        })
-                        .map((item, idx) => (
-                          <div
-                            key={idx}
-                            className="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-all"
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-red-400 font-bold text-sm">
-                                {item.time}
-                              </span>
-                              <span className="text-xs text-gray-400">🎬</span>
-                            </div>
-                            <div className="text-white font-semibold text-base">
-                              {item.title}
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                ))}
+                      </div>
+                    ))}
+                </div>
               </div>
             )}
           </div>
