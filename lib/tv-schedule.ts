@@ -752,23 +752,36 @@ export async function getTodayMovies(): Promise<TodayMovieItem[]> {
 
     // Film listesini parse et - Format: **00**:00 Film Adı KANAL
     // Sadece bugünün filmleri bölümündeki li elementlerini al
+    let foundTodaySection = false;
     let foundTomorrowSection = false;
+    
     $('li').each((index, element) => {
       const $el = $(element);
       const fullText = $el.text().trim();
       
-      // Eğer "Yarının Dizileri" veya "Yarının Filmleri" başlığını görürsek, dur
-      if (fullText.includes('Yarının Dizileri') || fullText.includes('Yarının Filmleri')) {
+      // "Bugünün Filmleri" başlığını bul
+      if (fullText.includes('Bugünün Filmleri')) {
+        foundTodaySection = true;
+        return; // continue
+      }
+      
+      // "Yarının Filmleri" başlığını bul - bundan sonra dur
+      if (fullText.includes('Yarının Filmleri')) {
         foundTomorrowSection = true;
         return false; // break
       }
       
-      // Eğer yarının bölümüne geldiysek, bu li'yi atla
-      if (foundTomorrowSection) {
+      // Eğer bugünün bölümüne henüz gelmediysek veya yarının bölümüne geldiysek, atla
+      if (!foundTodaySection || foundTomorrowSection) {
         return;
       }
       
       if (!fullText || fullText.length < 5) return;
+      
+      // Zaman formatı kontrolü - eğer sadece tarih varsa (örn: "04 Jan2026"), atla
+      if (/^\d{1,2}\s+[A-Z][a-z]{2}\d{4}$/.test(fullText)) {
+        return;
+      }
       
       // Zaman bilgisini bul - HTML'de <strong>00</strong>:00 formatı olabilir
       let time = '';
