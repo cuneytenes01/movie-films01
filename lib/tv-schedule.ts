@@ -10,6 +10,37 @@ export interface TVScheduleItem {
   duration?: string; // Opsiyonel süre (örn: "120 dk")
 }
 
+// Bugünkü maç verisi
+export interface TodayMatch {
+  time: string; // "04.01.2026 14:30"
+  homeTeam: string; // "Lazio"
+  awayTeam: string; // "Napoli"
+  channels: string[]; // ["S Sport Plus", "Tivibu Spor 1", "S Sport 2"]
+  sport: 'futbol' | 'basketbol';
+}
+
+// Bugünkü dizi verisi
+export interface TodaySeriesItem {
+  time: string;
+  title: string;
+  channel: string;
+  channelLogo?: string;
+  type: 'dizi';
+  genre?: string;
+  episode?: string; // "Bölüm 5" gibi
+}
+
+// Bugünkü film verisi
+export interface TodayMovieItem {
+  time: string;
+  title: string;
+  channel: string;
+  channelLogo?: string;
+  type: 'film';
+  genre?: string;
+  duration?: string;
+}
+
 export interface TVSchedule {
   date: string;
   items: TVScheduleItem[];
@@ -426,6 +457,226 @@ export async function getTodayTVScheduleByChannel(): Promise<TVScheduleByChannel
     });
 
     return Array.from(channelMap.values());
+  }
+}
+
+// Bugünkü maçları çek
+export async function getTodayMatches(sport: 'futbol' | 'basketbol' = 'futbol'): Promise<TodayMatch[]> {
+  try {
+    const url = `https://www.tvyayinakisi.com/bugunku-maclar/?sport=${sport}`;
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      },
+      next: { revalidate: 3600 }, // 1 saat cache
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const html = await response.text();
+    const $ = load(html);
+    const matches: TodayMatch[] = [];
+
+    // Maç listesini parse et - Format: **04.01.2026 14:30** Lazio - Napoli S Sport Plus, Tivibu Spor 1, S Sport 2
+    $('ul li, ol li').each((index, element) => {
+      const $el = $(element);
+      const text = $el.text().trim();
+      
+      // Zaman bilgisini bul (**04.01.2026 14:30** formatında)
+      const timeMatch = text.match(/\*\*([^*]+)\*\*/);
+      if (!timeMatch) return;
+      
+      const time = timeMatch[1].trim();
+      let rest = text.replace(/\*\*[^*]+\*\*/, '').trim();
+      
+      // Takımları ve kanalları ayır
+      // Format: "Lazio - Napoli S Sport Plus, Tivibu Spor 1, S Sport 2"
+      const dashIndex = rest.indexOf(' - ');
+      if (dashIndex === -1) return;
+      
+      const homeTeam = rest.substring(0, dashIndex).trim();
+      const afterDash = rest.substring(dashIndex + 3).trim();
+      
+      // Kanal bilgisini bul (genellikle son kısımda, virgülle ayrılmış)
+      // Takım adından sonra kanallar geliyor
+      const parts = afterDash.split(/\s+(?=[A-Z])/);
+      if (parts.length < 2) return;
+      
+      // Son kısım kanallar olmalı
+      const channelsStr = parts.slice(-1)[0];
+      const awayTeam = parts.slice(0, -1).join(' ').trim();
+      
+      const channels = channelsStr.split(',').map(c => c.trim()).filter(Boolean);
+
+      if (homeTeam && awayTeam && channels.length > 0) {
+        matches.push({
+          time,
+          homeTeam,
+          awayTeam,
+          channels,
+          sport,
+        });
+      }
+    });
+
+    return matches;
+  } catch (error) {
+    console.error('Maçlar çekilemedi:', error);
+    return [];
+  }
+}
+
+// Bugünkü dizileri çek
+export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
+  try {
+    const url = 'https://www.tvyayinakisi.com/dizi-yayin-akisi/';
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      },
+      next: { revalidate: 3600 }, // 1 saat cache
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const html = await response.text();
+    const $ = load(html);
+    const series: TodaySeriesItem[] = [];
+
+    // Bugünün tarihini kontrol et (sayfada "04 Jan2026 Bugünün Dizileri" gibi bir başlık var)
+    const today = new Date();
+    const todayDay = today.getDate();
+    const todayMonth = today.toLocaleDateString('en-US', { month: 'short' });
+
+    // Dizi listesini parse et - Format: **00**:00 Dizi Adı KANAL
+    $('ul li, ol li').each((index, element) => {
+      const $el = $(element);
+      const text = $el.text().trim();
+      
+      // Zaman bilgisini bul (**00**:00 formatında)
+      const timeMatch = text.match(/\*\*(\d{1,2}):(\d{2})\*\*/);
+      if (!timeMatch) return;
+      
+      const time = `${timeMatch[1]}:${timeMatch[2]}`;
+      const rest = text.replace(/\*\*[^*]+\*\*/, '').trim();
+      
+      if (!rest) return;
+      
+      // Dizi adı ve kanalı ayır (kanal genellikle büyük harflerle yazılmış, son kısımda)
+      // Kanal isimleri genellikle kısa ve büyük harflerle (KANAL D, ATV, SHOW TV, etc.)
+      const parts = rest.split(/\s+/);
+      if (parts.length < 2) return;
+      
+      // Son birkaç kelime kanal olabilir (SHOW TV, KANAL D gibi iki kelimeli kanallar var)
+      // Kanal isimlerini kontrol et
+      const knownChannels = ['KANAL', 'SHOW', 'STAR', 'TRT', 'SİNEMA', 'BEYAZ', 'TEVE', 'FX', 'A2', 'NOW', 'ATV', 'TV8', '360', 'CARTOON', 'NETWORK'];
+      let channelEndIndex = parts.length;
+      
+      // Son kelimeden başlayarak geriye doğru kanal ismini bul
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const word = parts[i].toUpperCase();
+        if (knownChannels.some(ch => word.includes(ch))) {
+          channelEndIndex = i;
+          break;
+        }
+      }
+      
+      const title = parts.slice(0, channelEndIndex).join(' ').trim();
+      const channel = parts.slice(channelEndIndex).join(' ').trim();
+
+      if (title && channel) {
+        series.push({
+          time,
+          title,
+          channel,
+          channelLogo: getChannelLogoUrl(channel),
+          type: 'dizi',
+        });
+      }
+    });
+
+    return series;
+  } catch (error) {
+    console.error('Diziler çekilemedi:', error);
+    return [];
+  }
+}
+
+// Bugünkü filmleri çek
+export async function getTodayMovies(): Promise<TodayMovieItem[]> {
+  try {
+    const url = 'https://www.tvyayinakisi.com/film-yayin-akisi/';
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      },
+      next: { revalidate: 3600 }, // 1 saat cache
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const html = await response.text();
+    const $ = load(html);
+    const movies: TodayMovieItem[] = [];
+
+    // Film listesini parse et - Format: **00**:00 Film Adı KANAL
+    $('ul li, ol li').each((index, element) => {
+      const $el = $(element);
+      const text = $el.text().trim();
+      
+      // Zaman bilgisini bul (**00**:00 formatında)
+      const timeMatch = text.match(/\*\*(\d{1,2}):(\d{2})\*\*/);
+      if (!timeMatch) return;
+      
+      const time = `${timeMatch[1]}:${timeMatch[2]}`;
+      const rest = text.replace(/\*\*[^*]+\*\*/, '').trim();
+      
+      if (!rest) return;
+      
+      // Film adı ve kanalı ayır (kanal genellikle büyük harflerle yazılmış, son kısımda)
+      const parts = rest.split(/\s+/);
+      if (parts.length < 2) return;
+      
+      // Kanal isimlerini kontrol et
+      const knownChannels = ['KANAL', 'SHOW', 'STAR', 'TRT', 'SİNEMA', 'BEYAZ', 'TEVE', 'FX', 'A2', 'NOW', 'ATV', 'TV8', '360', 'CARTOON', 'NETWORK'];
+      let channelEndIndex = parts.length;
+      
+      // Son kelimeden başlayarak geriye doğru kanal ismini bul
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const word = parts[i].toUpperCase();
+        if (knownChannels.some(ch => word.includes(ch))) {
+          channelEndIndex = i;
+          break;
+        }
+      }
+      
+      const title = parts.slice(0, channelEndIndex).join(' ').trim();
+      const channel = parts.slice(channelEndIndex).join(' ').trim();
+
+      if (title && channel) {
+        movies.push({
+          time,
+          title,
+          channel,
+          channelLogo: getChannelLogoUrl(channel),
+          type: 'film',
+        });
+      }
+    });
+
+    return movies;
+  } catch (error) {
+    console.error('Filmler çekilemedi:', error);
+    return [];
   }
 }
 
