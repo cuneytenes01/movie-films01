@@ -559,7 +559,7 @@ export async function getTodayMatches(sport: 'futbol' | 'basketbol' = 'futbol'):
           time: timeText,
           homeTeam,
           awayTeam,
-          channels: [...new Set(channels)],
+          channels: Array.from(new Set(channels)),
           sport,
         });
       }
