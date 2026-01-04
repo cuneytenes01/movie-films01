@@ -603,28 +603,46 @@ export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
       
       if (!fullText || fullText.length < 5) return;
       
-      // Zaman bilgisini bul
-      const $strong = $el.find('strong').first();
+      // Zaman bilgisini bul - HTML'de <strong>00</strong>:00 formatı olabilir
       let time = '';
       let content = fullText;
       
-      if ($strong.length > 0) {
-        const timeText = $strong.text().trim();
-        time = timeText.replace(/\*\*/g, '').trim().replace(/\s+/g, '').replace(/(\d{1,2})\s*:\s*(\d{2})/, '$1:$2');
-        content = fullText.replace(timeText, '').trim();
+      // Önce tam zaman formatını regex ile bul
+      const timeMatch = fullText.match(/(\d{1,2})\s*:\s*(\d{2})/);
+      if (timeMatch) {
+        time = `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`;
+        // Zaman kısmını content'ten çıkar
+        content = fullText.replace(/\*\*?\s*(\d{1,2})\s*:\s*(\d{2})\s*\*\*?/g, '').trim();
       } else {
-        const timeMatch = fullText.match(/\*\*(\d{1,2})\s*:\s*(\d{2})\*\*/);
-        if (timeMatch) {
-          time = `${timeMatch[1]}:${timeMatch[2]}`;
-          content = fullText.replace(/\*\*[^*]+\*\*/, '').trim();
+        // Fallback: strong elementinden al
+        const $strong = $el.find('strong').first();
+        if ($strong.length > 0) {
+          const timeText = $strong.text().trim();
+          // Strong içinde sadece saat varsa, dakikayı da bul
+          const hourMatch = timeText.match(/(\d{1,2})/);
+          if (hourMatch) {
+            const hour = hourMatch[1];
+            // Dakikayı fullText'ten bul
+            const minuteMatch = fullText.match(new RegExp(`${hour}\\s*:\\s*(\\d{2})`));
+            if (minuteMatch) {
+              time = `${hour.padStart(2, '0')}:${minuteMatch[1]}`;
+              content = fullText.replace(/\*\*?\s*(\d{1,2})\s*:\s*(\d{2})\s*\*\*?/g, '').trim();
+            } else {
+              return;
+            }
+          } else {
+            return;
+          }
         } else {
           return;
         }
       }
       
-      // Zaman formatını normalize et (boşlukları kaldır)
+      // Zaman formatını normalize et (boşlukları kaldır, formatı düzelt)
       if (time) {
-        time = time.replace(/\s+/g, '').replace(/(\d{1,2})\s*:\s*(\d{2})/, '$1:$2');
+        time = time.replace(/\s+/g, '').replace(/(\d{1,2})\s*:\s*(\d{2})/, (match, h, m) => {
+          return `${h.padStart(2, '0')}:${m}`;
+        });
       }
       
       if (!time || !content) return;
@@ -706,28 +724,46 @@ export async function getTodayMovies(): Promise<TodayMovieItem[]> {
       
       if (!fullText || fullText.length < 5) return;
       
-      // Zaman bilgisini bul
-      const $strong = $el.find('strong').first();
+      // Zaman bilgisini bul - HTML'de <strong>00</strong>:00 formatı olabilir
       let time = '';
       let content = fullText;
       
-      if ($strong.length > 0) {
-        const timeText = $strong.text().trim();
-        time = timeText.replace(/\*\*/g, '').trim().replace(/\s+/g, '').replace(/(\d{1,2})\s*:\s*(\d{2})/, '$1:$2');
-        content = fullText.replace(timeText, '').trim();
+      // Önce tam zaman formatını regex ile bul
+      const timeMatch = fullText.match(/(\d{1,2})\s*:\s*(\d{2})/);
+      if (timeMatch) {
+        time = `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`;
+        // Zaman kısmını content'ten çıkar
+        content = fullText.replace(/\*\*?\s*(\d{1,2})\s*:\s*(\d{2})\s*\*\*?/g, '').trim();
       } else {
-        const timeMatch = fullText.match(/\*\*(\d{1,2})\s*:\s*(\d{2})\*\*/);
-        if (timeMatch) {
-          time = `${timeMatch[1]}:${timeMatch[2]}`;
-          content = fullText.replace(/\*\*[^*]+\*\*/, '').trim();
+        // Fallback: strong elementinden al
+        const $strong = $el.find('strong').first();
+        if ($strong.length > 0) {
+          const timeText = $strong.text().trim();
+          // Strong içinde sadece saat varsa, dakikayı da bul
+          const hourMatch = timeText.match(/(\d{1,2})/);
+          if (hourMatch) {
+            const hour = hourMatch[1];
+            // Dakikayı fullText'ten bul
+            const minuteMatch = fullText.match(new RegExp(`${hour}\\s*:\\s*(\\d{2})`));
+            if (minuteMatch) {
+              time = `${hour.padStart(2, '0')}:${minuteMatch[1]}`;
+              content = fullText.replace(/\*\*?\s*(\d{1,2})\s*:\s*(\d{2})\s*\*\*?/g, '').trim();
+            } else {
+              return;
+            }
+          } else {
+            return;
+          }
         } else {
           return;
         }
       }
       
-      // Zaman formatını normalize et (boşlukları kaldır)
+      // Zaman formatını normalize et (boşlukları kaldır, formatı düzelt)
       if (time) {
-        time = time.replace(/\s+/g, '').replace(/(\d{1,2})\s*:\s*(\d{2})/, '$1:$2');
+        time = time.replace(/\s+/g, '').replace(/(\d{1,2})\s*:\s*(\d{2})/, (match, h, m) => {
+          return `${h.padStart(2, '0')}:${m}`;
+        });
       }
       
       if (!time || !content) return;

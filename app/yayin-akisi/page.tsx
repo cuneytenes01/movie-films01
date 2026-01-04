@@ -222,7 +222,7 @@ export default function YayinAkisiPage() {
                         className="flex items-center gap-4 py-3 px-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all border-b border-white/5 last:border-b-0"
                       >
                         <span className="text-purple-400 font-bold text-base md:text-lg min-w-[70px] md:min-w-[80px]">
-                          {item.time.replace(/\s+/g, '').replace(/(\d{1,2})\s*:\s*(\d{2})/, '$1:$2')}
+                          {item.time.includes(':') ? item.time : `${item.time}:00`}
                         </span>
                         <span className="text-white font-semibold text-sm md:text-base flex-1">
                           {item.title}
@@ -276,7 +276,7 @@ export default function YayinAkisiPage() {
                         className="flex items-center gap-4 py-3 px-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all border-b border-white/5 last:border-b-0"
                       >
                         <span className="text-red-400 font-bold text-base md:text-lg min-w-[70px] md:min-w-[80px]">
-                          {item.time.replace(/\s+/g, '').replace(/(\d{1,2})\s*:\s*(\d{2})/, '$1:$2')}
+                          {item.time.includes(':') ? item.time : `${item.time}:00`}
                         </span>
                         <span className="text-white font-semibold text-sm md:text-base flex-1">
                           {item.title}
