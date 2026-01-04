@@ -624,11 +624,12 @@ export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
       
       if (!time || !content) return;
       
-      // Kanal isimlerini kontrol et
+      // Kanal isimlerini kontrol et (daha kapsamlı liste)
       const knownChannels = [
-        'KANAL D', 'SHOW TV', 'STAR TV', 'TRT 1', 'TRT TÜRK', 'TRT KURDİ', 'TRT 2',
+        'KANAL D', 'SHOW TV', 'STAR TV', 'TRT 1', 'TRT TÜRK', 'TRT KURDİ', 'TRT 2', 'TRT ÇOCUK', 'TRT HABER',
         'SİNEMA TV', 'SİNEMA YERLİ', 'SİNEMA YERLİ 2', 'SİNEMA AİLE', 'SİNEMA KOMEDİ', 'SİNEMA TV AKSİYON', 'SİNEMA 1002',
-        'BEYAZ TV', 'TEVE2', 'FX', 'A2', 'NOW', 'ATV', 'TV8', '360', 'CARTOON NETWORK', 'KANAL 7'
+        'BEYAZ TV', 'TEVE2', 'FX', 'A2', 'NOW', 'ATV', 'TV8', '360', 'CARTOON NETWORK', 'KANAL 7',
+        'FOX', 'NTV', 'CNN TÜRK', 'HABERTÜRK', 'A HABER', 'KANAL 7', 'TV 8.5', 'BLOOMBERG HT'
       ];
       
       // Kanalı bul
@@ -721,11 +722,12 @@ export async function getTodayMovies(): Promise<TodayMovieItem[]> {
       
       if (!time || !content) return;
       
-      // Kanal isimlerini kontrol et
+      // Kanal isimlerini kontrol et (daha kapsamlı liste)
       const knownChannels = [
-        'KANAL D', 'SHOW TV', 'STAR TV', 'TRT 1', 'TRT TÜRK', 'TRT KURDİ', 'TRT 2',
+        'KANAL D', 'SHOW TV', 'STAR TV', 'TRT 1', 'TRT TÜRK', 'TRT KURDİ', 'TRT 2', 'TRT ÇOCUK', 'TRT HABER',
         'SİNEMA TV', 'SİNEMA YERLİ', 'SİNEMA YERLİ 2', 'SİNEMA AİLE', 'SİNEMA KOMEDİ', 'SİNEMA TV AKSİYON', 'SİNEMA 1002',
-        'BEYAZ TV', 'TEVE2', 'FX', 'A2', 'NOW', 'ATV', 'TV8', '360', 'CARTOON NETWORK', 'KANAL 7'
+        'BEYAZ TV', 'TEVE2', 'FX', 'A2', 'NOW', 'ATV', 'TV8', '360', 'CARTOON NETWORK', 'KANAL 7',
+        'FOX', 'NTV', 'CNN TÜRK', 'HABERTÜRK', 'A HABER', 'KANAL 7', 'TV 8.5', 'BLOOMBERG HT'
       ];
       
       // Kanalı bul
