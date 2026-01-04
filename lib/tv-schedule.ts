@@ -479,43 +479,87 @@ export async function getTodayMatches(sport: 'futbol' | 'basketbol' = 'futbol'):
     const $ = load(html);
     const matches: TodayMatch[] = [];
 
-    // Maç listesini parse et - Format: **04.01.2026 14:30** Lazio - Napoli S Sport Plus, Tivibu Spor 1, S Sport 2
-    $('ul li, ol li').each((index, element) => {
+    // Maç listesini parse et - daha basit ve güvenilir yaklaşım
+    $('li').each((index, element) => {
       const $el = $(element);
-      const text = $el.text().trim();
+      const fullText = $el.text().trim();
       
-      // Zaman bilgisini bul (**04.01.2026 14:30** formatında)
-      const timeMatch = text.match(/\*\*([^*]+)\*\*/);
-      if (!timeMatch) return;
+      if (!fullText || fullText.length < 15) return;
       
-      const time = timeMatch[1].trim();
-      let rest = text.replace(/\*\*[^*]+\*\*/, '').trim();
+      // Zaman bilgisini bul (strong içinde veya ** ile çevrili)
+      const $strong = $el.find('strong').first();
+      let timeText = '';
       
-      // Takımları ve kanalları ayır
+      if ($strong.length > 0) {
+        timeText = $strong.text().trim();
+      } else {
+        // ** ile çevrili
+        const timeMatch = fullText.match(/\*\*([^*]+)\*\*/);
+        if (timeMatch) {
+          timeText = timeMatch[1].trim();
+        }
+      }
+      
+      if (!timeText) return;
+      
+      // Kalan metni al
+      let content = fullText;
+      if ($strong.length > 0) {
+        content = fullText.replace(timeText, '').trim();
+      } else {
+        content = fullText.replace(/\*\*[^*]+\*\*/, '').trim();
+      }
+      
       // Format: "Lazio - Napoli S Sport Plus, Tivibu Spor 1, S Sport 2"
-      const dashIndex = rest.indexOf(' - ');
-      if (dashIndex === -1) return;
+      // veya "Lazio - Napoli S Sport Plus"
+      const dashMatch = content.match(/^(.+?)\s+-\s+(.+)$/);
+      if (!dashMatch) return;
       
-      const homeTeam = rest.substring(0, dashIndex).trim();
-      const afterDash = rest.substring(dashIndex + 3).trim();
+      const homeTeam = dashMatch[1].trim();
+      const rest = dashMatch[2].trim();
       
-      // Kanal bilgisini bul (genellikle son kısımda, virgülle ayrılmış)
-      // Takım adından sonra kanallar geliyor
-      const parts = afterDash.split(/\s+(?=[A-Z])/);
-      if (parts.length < 2) return;
+      // Kanalları bul
+      const possibleChannels = [
+        'S Sport Plus', 'S Sport 2', 'S Sport', 'Spor Smart',
+        'beIN SPORTS 3', 'beIN SPORTS 4', 'beIN SPORTS MAX 1', 'beIN SPORTS MAX 2', 'beIN SPORTS HABER', 'beIN SPORTS 5', 'beIN SPORTS', 'beIN CONNECT',
+        'EXXEN', 'Tivibu Spor 1', 'Tivibu Spor 2', 'Tivibu Spor',
+        'TRT Spor', 'tabii', 'A-Leagues YouTube'
+      ];
       
-      // Son kısım kanallar olmalı
-      const channelsStr = parts.slice(-1)[0];
-      const awayTeam = parts.slice(0, -1).join(' ').trim();
+      const channels: string[] = [];
+      let awayTeam = rest;
       
-      const channels = channelsStr.split(',').map(c => c.trim()).filter(Boolean);
-
+      // Kanalları bul
+      for (const channel of possibleChannels) {
+        if (rest.includes(channel)) {
+          channels.push(channel);
+          awayTeam = awayTeam.replace(channel, '').trim();
+        }
+      }
+      
+      // Virgülle ayrılmış kanalları da kontrol et
+      if (rest.includes(',')) {
+        const parts = rest.split(',');
+        parts.forEach(part => {
+          const trimmed = part.trim();
+          for (const channel of possibleChannels) {
+            if (trimmed.includes(channel) && !channels.includes(channel)) {
+              channels.push(channel);
+              awayTeam = awayTeam.replace(trimmed, '').trim();
+            }
+          }
+        });
+      }
+      
+      // Away team'i temizle (kanallardan arındır)
+      awayTeam = awayTeam.replace(/,/g, '').trim();
+      
       if (homeTeam && awayTeam && channels.length > 0) {
         matches.push({
-          time,
+          time: timeText,
           homeTeam,
           awayTeam,
-          channels,
+          channels: [...new Set(channels)],
           sport,
         });
       }
@@ -553,42 +597,66 @@ export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
     const todayMonth = today.toLocaleDateString('en-US', { month: 'short' });
 
     // Dizi listesini parse et - Format: **00**:00 Dizi Adı KANAL
-    $('ul li, ol li').each((index, element) => {
+    $('li').each((index, element) => {
       const $el = $(element);
-      const text = $el.text().trim();
+      const fullText = $el.text().trim();
       
-      // Zaman bilgisini bul (**00**:00 formatında)
-      const timeMatch = text.match(/\*\*(\d{1,2}):(\d{2})\*\*/);
-      if (!timeMatch) return;
+      if (!fullText || fullText.length < 5) return;
       
-      const time = `${timeMatch[1]}:${timeMatch[2]}`;
-      const rest = text.replace(/\*\*[^*]+\*\*/, '').trim();
+      // Zaman bilgisini bul
+      const $strong = $el.find('strong').first();
+      let time = '';
+      let content = fullText;
       
-      if (!rest) return;
+      if ($strong.length > 0) {
+        const timeText = $strong.text().trim();
+        time = timeText.replace(/\*\*/g, '').trim();
+        content = fullText.replace(timeText, '').trim();
+      } else {
+        const timeMatch = fullText.match(/\*\*(\d{1,2}):(\d{2})\*\*/);
+        if (timeMatch) {
+          time = `${timeMatch[1]}:${timeMatch[2]}`;
+          content = fullText.replace(/\*\*[^*]+\*\*/, '').trim();
+        } else {
+          return;
+        }
+      }
       
-      // Dizi adı ve kanalı ayır (kanal genellikle büyük harflerle yazılmış, son kısımda)
-      // Kanal isimleri genellikle kısa ve büyük harflerle (KANAL D, ATV, SHOW TV, etc.)
-      const parts = rest.split(/\s+/);
-      if (parts.length < 2) return;
+      if (!time || !content) return;
       
-      // Son birkaç kelime kanal olabilir (SHOW TV, KANAL D gibi iki kelimeli kanallar var)
       // Kanal isimlerini kontrol et
-      const knownChannels = ['KANAL', 'SHOW', 'STAR', 'TRT', 'SİNEMA', 'BEYAZ', 'TEVE', 'FX', 'A2', 'NOW', 'ATV', 'TV8', '360', 'CARTOON', 'NETWORK'];
-      let channelEndIndex = parts.length;
+      const knownChannels = [
+        'KANAL D', 'SHOW TV', 'STAR TV', 'TRT 1', 'TRT TÜRK', 'TRT KURDİ', 'TRT 2',
+        'SİNEMA TV', 'SİNEMA YERLİ', 'SİNEMA YERLİ 2', 'SİNEMA AİLE', 'SİNEMA KOMEDİ', 'SİNEMA TV AKSİYON', 'SİNEMA 1002',
+        'BEYAZ TV', 'TEVE2', 'FX', 'A2', 'NOW', 'ATV', 'TV8', '360', 'CARTOON NETWORK', 'KANAL 7'
+      ];
       
-      // Son kelimeden başlayarak geriye doğru kanal ismini bul
-      for (let i = parts.length - 1; i >= 0; i--) {
-        const word = parts[i].toUpperCase();
-        if (knownChannels.some(ch => word.includes(ch))) {
-          channelEndIndex = i;
+      // Kanalı bul
+      let channel = '';
+      let title = content;
+      
+      for (const knownChannel of knownChannels) {
+        if (content.includes(knownChannel)) {
+          channel = knownChannel;
+          title = content.replace(knownChannel, '').trim();
           break;
         }
       }
       
-      const title = parts.slice(0, channelEndIndex).join(' ').trim();
-      const channel = parts.slice(channelEndIndex).join(' ').trim();
-
-      if (title && channel) {
+      // Eğer bilinen kanal bulunamadıysa, son kelime veya kelimeleri kanal olarak dene
+      if (!channel) {
+        const words = content.split(/\s+/);
+        if (words.length >= 2) {
+          // Son 1-2 kelime kanal olabilir
+          const lastWord = words[words.length - 1];
+          if (lastWord.length > 2 && /^[A-Z]/.test(lastWord)) {
+            channel = lastWord;
+            title = words.slice(0, -1).join(' ').trim();
+          }
+        }
+      }
+      
+      if (time && title && channel) {
         series.push({
           time,
           title,
@@ -626,40 +694,129 @@ export async function getTodayMovies(): Promise<TodayMovieItem[]> {
     const movies: TodayMovieItem[] = [];
 
     // Film listesini parse et - Format: **00**:00 Film Adı KANAL
-    $('ul li, ol li').each((index, element) => {
+    $('li').each((index, element) => {
       const $el = $(element);
-      const text = $el.text().trim();
+      const fullText = $el.text().trim();
       
-      // Zaman bilgisini bul (**00**:00 formatında)
-      const timeMatch = text.match(/\*\*(\d{1,2}):(\d{2})\*\*/);
-      if (!timeMatch) return;
+      if (!fullText || fullText.length < 5) return;
       
-      const time = `${timeMatch[1]}:${timeMatch[2]}`;
-      const rest = text.replace(/\*\*[^*]+\*\*/, '').trim();
+      // Zaman bilgisini bul
+      const $strong = $el.find('strong').first();
+      let time = '';
+      let content = fullText;
       
-      if (!rest) return;
+      if ($strong.length > 0) {
+        const timeText = $strong.text().trim();
+        time = timeText.replace(/\*\*/g, '').trim();
+        content = fullText.replace(timeText, '').trim();
+      } else {
+        const timeMatch = fullText.match(/\*\*(\d{1,2}):(\d{2})\*\*/);
+        if (timeMatch) {
+          time = `${timeMatch[1]}:${timeMatch[2]}`;
+          content = fullText.replace(/\*\*[^*]+\*\*/, '').trim();
+        } else {
+          return;
+        }
+      }
       
-      // Film adı ve kanalı ayır (kanal genellikle büyük harflerle yazılmış, son kısımda)
-      const parts = rest.split(/\s+/);
-      if (parts.length < 2) return;
+      if (!time || !content) return;
       
       // Kanal isimlerini kontrol et
-      const knownChannels = ['KANAL', 'SHOW', 'STAR', 'TRT', 'SİNEMA', 'BEYAZ', 'TEVE', 'FX', 'A2', 'NOW', 'ATV', 'TV8', '360', 'CARTOON', 'NETWORK'];
-      let channelEndIndex = parts.length;
+      const knownChannels = [
+        'KANAL D', 'SHOW TV', 'STAR TV', 'TRT 1', 'TRT TÜRK', 'TRT KURDİ', 'TRT 2',
+        'SİNEMA TV', 'SİNEMA YERLİ', 'SİNEMA YERLİ 2', 'SİNEMA AİLE', 'SİNEMA KOMEDİ', 'SİNEMA TV AKSİYON', 'SİNEMA 1002',
+        'BEYAZ TV', 'TEVE2', 'FX', 'A2', 'NOW', 'ATV', 'TV8', '360', 'CARTOON NETWORK', 'KANAL 7'
+      ];
       
-      // Son kelimeden başlayarak geriye doğru kanal ismini bul
-      for (let i = parts.length - 1; i >= 0; i--) {
-        const word = parts[i].toUpperCase();
-        if (knownChannels.some(ch => word.includes(ch))) {
-          channelEndIndex = i;
+      // Kanalı bul
+      let channel = '';
+      let title = content;
+      
+      for (const knownChannel of knownChannels) {
+        if (content.includes(knownChannel)) {
+          channel = knownChannel;
+          title = content.replace(knownChannel, '').trim();
           break;
         }
       }
       
-      const title = parts.slice(0, channelEndIndex).join(' ').trim();
-      const channel = parts.slice(channelEndIndex).join(' ').trim();
-
-      if (title && channel) {
+      // Eğer bilinen kanal bulunamadıysa, son kelime veya kelimeleri kanal olarak dene
+      if (!channel) {
+        const words = content.split(/\s+/);
+        if (words.length >= 2) {
+          // Son 1-2 kelime kanal olabilir
+          const lastWord = words[words.length - 1];
+          if (lastWord.length > 2 && /^[A-Z]/.test(lastWord)) {
+            channel = lastWord;
+            title = words.slice(0, -1).join(' ').trim();
+          }
+        }
+      }
+      
+      if (time && title && channel) {
+        movies.push({
+          time,
+          title,
+          channel,
+          channelLogo: getChannelLogoUrl(channel),
+          type: 'film',
+        });
+      }
+      
+      // Zaman bilgisini bul
+      const $strong = $el.find('strong').first();
+      let time = '';
+      let content = fullText;
+      
+      if ($strong.length > 0) {
+        const timeText = $strong.text().trim();
+        time = timeText.replace(/\*\*/g, '').trim();
+        content = fullText.replace(timeText, '').trim();
+      } else {
+        const timeMatch = fullText.match(/\*\*(\d{1,2}):(\d{2})\*\*/);
+        if (timeMatch) {
+          time = `${timeMatch[1]}:${timeMatch[2]}`;
+          content = fullText.replace(/\*\*[^*]+\*\*/, '').trim();
+        } else {
+          return;
+        }
+      }
+      
+      if (!time || !content) return;
+      
+      // Kanal isimlerini kontrol et
+      const knownChannels = [
+        'KANAL D', 'SHOW TV', 'STAR TV', 'TRT 1', 'TRT TÜRK', 'TRT KURDİ', 'TRT 2',
+        'SİNEMA TV', 'SİNEMA YERLİ', 'SİNEMA YERLİ 2', 'SİNEMA AİLE', 'SİNEMA KOMEDİ', 'SİNEMA TV AKSİYON', 'SİNEMA 1002',
+        'BEYAZ TV', 'TEVE2', 'FX', 'A2', 'NOW', 'ATV', 'TV8', '360', 'CARTOON NETWORK', 'KANAL 7'
+      ];
+      
+      // Kanalı bul
+      let channel = '';
+      let title = content;
+      
+      for (const knownChannel of knownChannels) {
+        if (content.includes(knownChannel)) {
+          channel = knownChannel;
+          title = content.replace(knownChannel, '').trim();
+          break;
+        }
+      }
+      
+      // Eğer bilinen kanal bulunamadıysa, son kelime veya kelimeleri kanal olarak dene
+      if (!channel) {
+        const words = content.split(/\s+/);
+        if (words.length >= 2) {
+          // Son 1-2 kelime kanal olabilir
+          const lastWord = words[words.length - 1];
+          if (lastWord.length > 2 && /^[A-Z]/.test(lastWord)) {
+            channel = lastWord;
+            title = words.slice(0, -1).join(' ').trim();
+          }
+        }
+      }
+      
+      if (time && title && channel) {
         movies.push({
           time,
           title,
