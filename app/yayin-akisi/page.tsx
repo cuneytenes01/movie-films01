@@ -222,14 +222,14 @@ export default function YayinAkisiPage() {
                         className="flex items-center gap-4 py-3 px-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all border-b border-white/5 last:border-b-0"
                       >
                         <span className="text-purple-400 font-bold text-base md:text-lg min-w-[70px] md:min-w-[80px]">
-                          {item.time}
+                          {item.time.replace(/\s+/g, '').replace(/(\d{1,2})\s*:\s*(\d{2})/, '$1:$2')}
                         </span>
                         <span className="text-white font-semibold text-sm md:text-base flex-1">
                           {item.title}
                         </span>
                         <div className="flex items-center gap-2">
                           {getChannelLogoUrl(item.channel) && (
-                            <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-lg overflow-hidden bg-white/10 hidden md:block">
+                            <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-lg overflow-hidden bg-white/10">
                               <Image
                                 src={getChannelLogoUrl(item.channel)!}
                                 alt={item.channel}
@@ -276,14 +276,14 @@ export default function YayinAkisiPage() {
                         className="flex items-center gap-4 py-3 px-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all border-b border-white/5 last:border-b-0"
                       >
                         <span className="text-red-400 font-bold text-base md:text-lg min-w-[70px] md:min-w-[80px]">
-                          {item.time}
+                          {item.time.replace(/\s+/g, '').replace(/(\d{1,2})\s*:\s*(\d{2})/, '$1:$2')}
                         </span>
                         <span className="text-white font-semibold text-sm md:text-base flex-1">
                           {item.title}
                         </span>
                         <div className="flex items-center gap-2">
                           {getChannelLogoUrl(item.channel) && (
-                            <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-lg overflow-hidden bg-white/10 hidden md:block">
+                            <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-lg overflow-hidden bg-white/10">
                               <Image
                                 src={getChannelLogoUrl(item.channel)!}
                                 alt={item.channel}

@@ -610,16 +610,21 @@ export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
       
       if ($strong.length > 0) {
         const timeText = $strong.text().trim();
-        time = timeText.replace(/\*\*/g, '').trim();
+        time = timeText.replace(/\*\*/g, '').trim().replace(/\s+/g, '').replace(/(\d{1,2})\s*:\s*(\d{2})/, '$1:$2');
         content = fullText.replace(timeText, '').trim();
       } else {
-        const timeMatch = fullText.match(/\*\*(\d{1,2}):(\d{2})\*\*/);
+        const timeMatch = fullText.match(/\*\*(\d{1,2})\s*:\s*(\d{2})\*\*/);
         if (timeMatch) {
           time = `${timeMatch[1]}:${timeMatch[2]}`;
           content = fullText.replace(/\*\*[^*]+\*\*/, '').trim();
         } else {
           return;
         }
+      }
+      
+      // Zaman formatını normalize et (boşlukları kaldır)
+      if (time) {
+        time = time.replace(/\s+/g, '').replace(/(\d{1,2})\s*:\s*(\d{2})/, '$1:$2');
       }
       
       if (!time || !content) return;
@@ -708,16 +713,21 @@ export async function getTodayMovies(): Promise<TodayMovieItem[]> {
       
       if ($strong.length > 0) {
         const timeText = $strong.text().trim();
-        time = timeText.replace(/\*\*/g, '').trim();
+        time = timeText.replace(/\*\*/g, '').trim().replace(/\s+/g, '').replace(/(\d{1,2})\s*:\s*(\d{2})/, '$1:$2');
         content = fullText.replace(timeText, '').trim();
       } else {
-        const timeMatch = fullText.match(/\*\*(\d{1,2}):(\d{2})\*\*/);
+        const timeMatch = fullText.match(/\*\*(\d{1,2})\s*:\s*(\d{2})\*\*/);
         if (timeMatch) {
           time = `${timeMatch[1]}:${timeMatch[2]}`;
           content = fullText.replace(/\*\*[^*]+\*\*/, '').trim();
         } else {
           return;
         }
+      }
+      
+      // Zaman formatını normalize et (boşlukları kaldır)
+      if (time) {
+        time = time.replace(/\s+/g, '').replace(/(\d{1,2})\s*:\s*(\d{2})/, '$1:$2');
       }
       
       if (!time || !content) return;
