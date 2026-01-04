@@ -17,7 +17,7 @@ const CHANNEL_LOGOS: Record<string, string> = {
   'TEVE2': 'https://upload.wikimedia.org/wikipedia/tr/e/e7/Teve2_yeni_logo.png',
 };
 
-export function getChannelLogoUrl(channel: string): string {
+function getChannelLogoUrl(channel: string): string {
   return CHANNEL_LOGOS[channel] || '';
 }
 
