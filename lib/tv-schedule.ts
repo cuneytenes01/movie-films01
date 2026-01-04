@@ -591,13 +591,23 @@ export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
     const $ = load(html);
     const series: TodaySeriesItem[] = [];
 
-    // Bugünün tarihini kontrol et (sayfada "04 Jan2026 Bugünün Dizileri" gibi bir başlık var)
-    const today = new Date();
-    const todayDay = today.getDate();
-    const todayMonth = today.toLocaleDateString('en-US', { month: 'short' });
-
     // Dizi listesini parse et - Format: **00**:00 Dizi Adı KANAL
+    // Sadece bugünün dizileri bölümündeki li elementlerini al
+    let foundTomorrowSection = false;
     $('li').each((index, element) => {
+      const $el = $(element);
+      const fullText = $el.text().trim();
+      
+      // Eğer "Yarının Dizileri" veya "Yarının Filmleri" başlığını görürsek, dur
+      if (fullText.includes('Yarının Dizileri') || fullText.includes('Yarının Filmleri')) {
+        foundTomorrowSection = true;
+        return false; // break
+      }
+      
+      // Eğer yarının bölümüne geldiysek, bu li'yi atla
+      if (foundTomorrowSection) {
+        return;
+      }
       const $el = $(element);
       const fullText = $el.text().trim();
       
@@ -730,9 +740,22 @@ export async function getTodayMovies(): Promise<TodayMovieItem[]> {
     const movies: TodayMovieItem[] = [];
 
     // Film listesini parse et - Format: **00**:00 Film Adı KANAL
+    // Sadece bugünün filmleri bölümündeki li elementlerini al
+    let foundTomorrowSection = false;
     $('li').each((index, element) => {
       const $el = $(element);
       const fullText = $el.text().trim();
+      
+      // Eğer "Yarının Dizileri" veya "Yarının Filmleri" başlığını görürsek, dur
+      if (fullText.includes('Yarının Dizileri') || fullText.includes('Yarının Filmleri')) {
+        foundTomorrowSection = true;
+        return false; // break
+      }
+      
+      // Eğer yarının bölümüne geldiysek, bu li'yi atla
+      if (foundTomorrowSection) {
+        return;
+      }
       
       if (!fullText || fullText.length < 5) return;
       
