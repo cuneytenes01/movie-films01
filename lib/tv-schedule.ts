@@ -593,23 +593,36 @@ export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
 
     // Dizi listesini parse et - Format: **00**:00 Dizi Adı KANAL
     // Sadece bugünün dizileri bölümündeki li elementlerini al
+    let foundTodaySection = false;
     let foundTomorrowSection = false;
+    
     $('li').each((index, element) => {
       const $el = $(element);
       const fullText = $el.text().trim();
       
-      // Eğer "Yarının Dizileri" veya "Yarının Filmleri" başlığını görürsek, dur
-      if (fullText.includes('Yarının Dizileri') || fullText.includes('Yarının Filmleri')) {
+      // "Bugünün Dizileri" başlığını bul
+      if (fullText.includes('Bugünün Dizileri')) {
+        foundTodaySection = true;
+        return; // continue
+      }
+      
+      // "Yarının Dizileri" başlığını bul - bundan sonra dur
+      if (fullText.includes('Yarının Dizileri')) {
         foundTomorrowSection = true;
         return false; // break
       }
       
-      // Eğer yarının bölümüne geldiysek, bu li'yi atla
-      if (foundTomorrowSection) {
+      // Eğer bugünün bölümüne henüz gelmediysek veya yarının bölümüne geldiysek, atla
+      if (!foundTodaySection || foundTomorrowSection) {
         return;
       }
       
       if (!fullText || fullText.length < 5) return;
+      
+      // Zaman formatı kontrolü - eğer sadece tarih varsa (örn: "04 Jan2026"), atla
+      if (/^\d{1,2}\s+[A-Z][a-z]{2}\d{4}$/.test(fullText)) {
+        return;
+      }
       
       // Zaman bilgisini bul - HTML'de <strong>00</strong>:00 formatı olabilir
       let time = '';
