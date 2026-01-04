@@ -762,69 +762,6 @@ export async function getTodayMovies(): Promise<TodayMovieItem[]> {
           type: 'film',
         });
       }
-      
-      // Zaman bilgisini bul
-      const $strong = $el.find('strong').first();
-      let time = '';
-      let content = fullText;
-      
-      if ($strong.length > 0) {
-        const timeText = $strong.text().trim();
-        time = timeText.replace(/\*\*/g, '').trim();
-        content = fullText.replace(timeText, '').trim();
-      } else {
-        const timeMatch = fullText.match(/\*\*(\d{1,2}):(\d{2})\*\*/);
-        if (timeMatch) {
-          time = `${timeMatch[1]}:${timeMatch[2]}`;
-          content = fullText.replace(/\*\*[^*]+\*\*/, '').trim();
-        } else {
-          return;
-        }
-      }
-      
-      if (!time || !content) return;
-      
-      // Kanal isimlerini kontrol et
-      const knownChannels = [
-        'KANAL D', 'SHOW TV', 'STAR TV', 'TRT 1', 'TRT TÜRK', 'TRT KURDİ', 'TRT 2',
-        'SİNEMA TV', 'SİNEMA YERLİ', 'SİNEMA YERLİ 2', 'SİNEMA AİLE', 'SİNEMA KOMEDİ', 'SİNEMA TV AKSİYON', 'SİNEMA 1002',
-        'BEYAZ TV', 'TEVE2', 'FX', 'A2', 'NOW', 'ATV', 'TV8', '360', 'CARTOON NETWORK', 'KANAL 7'
-      ];
-      
-      // Kanalı bul
-      let channel = '';
-      let title = content;
-      
-      for (const knownChannel of knownChannels) {
-        if (content.includes(knownChannel)) {
-          channel = knownChannel;
-          title = content.replace(knownChannel, '').trim();
-          break;
-        }
-      }
-      
-      // Eğer bilinen kanal bulunamadıysa, son kelime veya kelimeleri kanal olarak dene
-      if (!channel) {
-        const words = content.split(/\s+/);
-        if (words.length >= 2) {
-          // Son 1-2 kelime kanal olabilir
-          const lastWord = words[words.length - 1];
-          if (lastWord.length > 2 && /^[A-Z]/.test(lastWord)) {
-            channel = lastWord;
-            title = words.slice(0, -1).join(' ').trim();
-          }
-        }
-      }
-      
-      if (time && title && channel) {
-        movies.push({
-          time,
-          title,
-          channel,
-          channelLogo: getChannelLogoUrl(channel),
-          type: 'film',
-        });
-      }
     });
 
     return movies;
