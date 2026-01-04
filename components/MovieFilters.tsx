@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 
 interface MovieFiltersProps {
   genres: { id: number; name: string }[]
+  filters: FilterState
   onFilterChange: (filters: FilterState) => void
 }
 
@@ -68,17 +69,7 @@ const CloseIcon = () => (
   </svg>
 )
 
-export default function MovieFilters({ genres, onFilterChange }: MovieFiltersProps) {
-  const [filters, setFilters] = useState<FilterState>({
-    sortBy: 'popularity.desc',
-    selectedGenres: [],
-    releaseDateFrom: '',
-    releaseDateTo: '',
-    minRating: 0,
-    minVotes: 0,
-    runtimeMin: 0,
-    runtimeMax: 300,
-  })
+export default function MovieFilters({ genres, filters, onFilterChange }: MovieFiltersProps) {
   const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
     sort: false,
     genres: false,
@@ -191,13 +182,11 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
       : [...filters.selectedGenres, genreId]
     
     const newFilters = { ...filters, selectedGenres: newGenres }
-    setFilters(newFilters)
     onFilterChange(newFilters)
   }
 
   const handleFilterChange = (key: keyof FilterState, value: any) => {
     const newFilters = { ...filters, [key]: value }
-    setFilters(newFilters)
     onFilterChange(newFilters)
   }
 
@@ -219,7 +208,6 @@ export default function MovieFilters({ genres, onFilterChange }: MovieFiltersPro
       runtimeMin: 0,
       runtimeMax: 300,
     }
-    setFilters(defaultFilters)
     onFilterChange(defaultFilters)
   }
 

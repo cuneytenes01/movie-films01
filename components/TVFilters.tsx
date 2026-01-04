@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 
 interface TVFiltersProps {
   genres: { id: number; name: string }[]
+  filters: TVFilterState
   onFilterChange: (filters: TVFilterState) => void
   variant?: 'green' | 'blue' // 'green' for on-the-air, 'blue' for tv page
 }
@@ -86,21 +87,7 @@ const CloseIcon = () => (
   </svg>
 )
 
-export default function TVFilters({ genres, onFilterChange, variant = 'green' }: TVFiltersProps) {
-  const [filters, setFilters] = useState<TVFilterState>({
-    sortBy: 'popularity.desc',
-    selectedGenres: [],
-    firstAirDateFrom: '',
-    firstAirDateTo: '',
-    airDateFrom: '',
-    airDateTo: '',
-    minRating: 0,
-    minVotes: 0,
-    runtimeMin: 0,
-    runtimeMax: 300,
-    network: '',
-    language: '',
-  })
+export default function TVFilters({ genres, filters, onFilterChange, variant = 'green' }: TVFiltersProps) {
   const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
     sort: false,
     genres: false,
@@ -213,13 +200,11 @@ export default function TVFilters({ genres, onFilterChange, variant = 'green' }:
       : [...filters.selectedGenres, genreId]
     
     const newFilters = { ...filters, selectedGenres: newGenres }
-    setFilters(newFilters)
     onFilterChange(newFilters)
   }
 
   const handleFilterChange = (key: keyof TVFilterState, value: any) => {
     const newFilters = { ...filters, [key]: value }
-    setFilters(newFilters)
     onFilterChange(newFilters)
   }
 
@@ -245,7 +230,6 @@ export default function TVFilters({ genres, onFilterChange, variant = 'green' }:
       network: '',
       language: '',
     }
-    setFilters(defaultFilters)
     onFilterChange(defaultFilters)
   }
 

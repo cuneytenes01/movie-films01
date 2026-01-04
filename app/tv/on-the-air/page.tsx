@@ -1,11 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { getPosterUrl, TVShow } from '@/lib/tmdb'
 import { createSlug } from '@/lib/slug'
 import TVFilters, { TVFilterState } from '@/components/TVFilters'
+import { debounce } from '@/lib/utils'
 
 function TVCard({ tvShow }: { tvShow: TVShow }) {
   return (
@@ -43,24 +45,58 @@ function TVCard({ tvShow }: { tvShow: TVShow }) {
   )
 }
 
+// URL'den filtreleri parse et
+function parseFiltersFromURL(searchParams: URLSearchParams): TVFilterState {
+  return {
+    sortBy: searchParams.get('sort_by') || 'popularity.desc',
+    selectedGenres: searchParams.get('genres')?.split(',').filter(Boolean).map(Number) || [],
+    firstAirDateFrom: searchParams.get('first_air_date_from') || '',
+    firstAirDateTo: searchParams.get('first_air_date_to') || '',
+    airDateFrom: searchParams.get('air_date_from') || '',
+    airDateTo: searchParams.get('air_date_to') || '',
+    minRating: parseFloat(searchParams.get('min_rating') || '0'),
+    minVotes: parseInt(searchParams.get('min_votes') || '0'),
+    runtimeMin: parseInt(searchParams.get('runtime_min') || '0'),
+    runtimeMax: parseInt(searchParams.get('runtime_max') || '300'),
+    network: searchParams.get('network') || '',
+    language: searchParams.get('language') || '',
+  }
+}
+
+// Filtreleri URL'e yaz
+function updateURLFromFilters(filters: TVFilterState, router: ReturnType<typeof useRouter>) {
+  const params = new URLSearchParams()
+  
+  if (filters.sortBy !== 'popularity.desc') params.set('sort_by', filters.sortBy)
+  if (filters.selectedGenres.length > 0) params.set('genres', filters.selectedGenres.join(','))
+  if (filters.firstAirDateFrom) params.set('first_air_date_from', filters.firstAirDateFrom)
+  if (filters.firstAirDateTo) params.set('first_air_date_to', filters.firstAirDateTo)
+  if (filters.airDateFrom) params.set('air_date_from', filters.airDateFrom)
+  if (filters.airDateTo) params.set('air_date_to', filters.airDateTo)
+  if (filters.minRating > 0) params.set('min_rating', filters.minRating.toString())
+  if (filters.minVotes > 0) params.set('min_votes', filters.minVotes.toString())
+  if (filters.runtimeMin > 0) params.set('runtime_min', filters.runtimeMin.toString())
+  if (filters.runtimeMax < 300) params.set('runtime_max', filters.runtimeMax.toString())
+  if (filters.network) params.set('network', filters.network)
+  if (filters.language) params.set('language', filters.language)
+  
+  const queryString = params.toString()
+  router.replace(queryString ? `?${queryString}` : window.location.pathname, { scroll: false })
+}
+
 export default function OnTheAirPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  
   const [tvShows, setTVShows] = useState<TVShow[]>([])
   const [genres, setGenres] = useState<{ id: number; name: string }[]>([])
   const [loading, setLoading] = useState(true)
-  const [filters, setFilters] = useState<TVFilterState>({
-    sortBy: 'popularity.desc',
-    selectedGenres: [],
-    firstAirDateFrom: '',
-    firstAirDateTo: '',
-    airDateFrom: '',
-    airDateTo: '',
-    minRating: 0,
-    minVotes: 0,
-    runtimeMin: 0,
-    runtimeMax: 300,
-    network: '',
-    language: '',
-  })
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [filters, setFilters] = useState<TVFilterState>(() => parseFiltersFromURL(searchParams))
+
+  const hasMore = page < totalPages
 
   useEffect(() => {
     async function loadGenres() {
@@ -75,56 +111,117 @@ export default function OnTheAirPage() {
     loadGenres()
   }, [])
 
+  // URL değiştiğinde filtreleri güncelle
   useEffect(() => {
-    async function loadTVShows() {
-      setLoading(true)
-      try {
-        const params = new URLSearchParams()
-        params.append('page', '1')
-        params.append('sort_by', filters.sortBy)
-        if (filters.selectedGenres.length > 0) {
-          params.append('with_genres', filters.selectedGenres.join(','))
-        }
-        if (filters.firstAirDateFrom) {
-          params.append('first_air_date.gte', filters.firstAirDateFrom)
-        }
-        if (filters.firstAirDateTo) {
-          params.append('first_air_date.lte', filters.firstAirDateTo)
-        }
-        if (filters.airDateFrom) {
-          params.append('air_date.gte', filters.airDateFrom)
-        }
-        if (filters.airDateTo) {
-          params.append('air_date.lte', filters.airDateTo)
-        }
-        if (filters.minRating > 0) {
-          params.append('vote_average.gte', filters.minRating.toString())
-        }
-        if (filters.minVotes > 0) {
-          params.append('vote_count.gte', filters.minVotes.toString())
-        }
-        if (filters.runtimeMin > 0) {
-          params.append('with_runtime.gte', filters.runtimeMin.toString())
-        }
-        if (filters.runtimeMax < 300) {
-          params.append('with_runtime.lte', filters.runtimeMax.toString())
-        }
-        if (filters.language) {
-          params.append('with_original_language', filters.language)
-        }
+    const urlFilters = parseFiltersFromURL(searchParams)
+    setFilters(urlFilters)
+  }, [searchParams])
 
-        const response = await fetch(`/api/discover/tv?${params.toString()}`)
-        const data = await response.json()
+  // TV Shows yükleme fonksiyonu
+  const loadTVShows = useCallback(async (pageNum: number, append: boolean = false) => {
+    if (pageNum === 1) {
+      setLoading(true)
+    } else {
+      setLoadingMore(true)
+    }
+    
+    try {
+      const params = new URLSearchParams()
+      params.append('page', pageNum.toString())
+      params.append('sort_by', filters.sortBy)
+      if (filters.selectedGenres.length > 0) {
+        params.append('with_genres', filters.selectedGenres.join(','))
+      }
+      if (filters.firstAirDateFrom) {
+        params.append('first_air_date.gte', filters.firstAirDateFrom)
+      }
+      if (filters.firstAirDateTo) {
+        params.append('first_air_date.lte', filters.firstAirDateTo)
+      }
+      if (filters.airDateFrom) {
+        params.append('air_date.gte', filters.airDateFrom)
+      }
+      if (filters.airDateTo) {
+        params.append('air_date.lte', filters.airDateTo)
+      }
+      if (filters.minRating > 0) {
+        params.append('vote_average.gte', filters.minRating.toString())
+      }
+      if (filters.minVotes > 0) {
+        params.append('vote_count.gte', filters.minVotes.toString())
+      }
+      if (filters.runtimeMin > 0) {
+        params.append('with_runtime.gte', filters.runtimeMin.toString())
+      }
+      if (filters.runtimeMax < 300) {
+        params.append('with_runtime.lte', filters.runtimeMax.toString())
+      }
+      if (filters.language) {
+        params.append('with_original_language', filters.language)
+      }
+
+      const response = await fetch(`/api/discover/tv?${params.toString()}`)
+      const data = await response.json()
+      
+      if (append) {
+        setTVShows(prev => [...prev, ...(data.results || [])])
+      } else {
         setTVShows(data.results || [])
-      } catch (error) {
-        console.error('Diziler yüklenemedi:', error)
+      }
+      
+      setTotalPages(data.total_pages || 1)
+    } catch (error) {
+      console.error('Diziler yüklenemedi:', error)
+      if (!append) {
         setTVShows([])
-      } finally {
-        setLoading(false)
+      }
+    } finally {
+      setLoading(false)
+      setLoadingMore(false)
+    }
+  }, [filters])
+
+  // Filtreler değiştiğinde sayfa 1'e dön ve yükle
+  useEffect(() => {
+    setPage(1)
+    loadTVShows(1, false)
+  }, [filters, loadTVShows])
+
+  // Sayfa değiştiğinde yükle (infinity scroll)
+  useEffect(() => {
+    if (page > 1) {
+      loadTVShows(page, true)
+    }
+  }, [page, loadTVShows])
+
+  // Infinity scroll handler
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loadingMore || !hasMore) return
+      
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      const windowHeight = window.innerHeight
+      const documentHeight = document.documentElement.scrollHeight
+      
+      // Sayfa sonuna 200px kala yükle
+      if (scrollTop + windowHeight >= documentHeight - 200) {
+        setPage(prev => prev + 1)
       }
     }
-    loadTVShows()
-  }, [filters])
+    
+    const debouncedHandleScroll = debounce(handleScroll, 100)
+    window.addEventListener('scroll', debouncedHandleScroll)
+    
+    return () => {
+      window.removeEventListener('scroll', debouncedHandleScroll)
+    }
+  }, [hasMore, loadingMore])
+
+  // Filtre değişikliği handler
+  const handleFilterChange = useCallback((newFilters: TVFilterState) => {
+    setFilters(newFilters)
+    updateURLFromFilters(newFilters, router)
+  }, [router])
 
   return (
     <div className="min-h-screen bg-gray-900 overflow-visible">
@@ -135,7 +232,12 @@ export default function OnTheAirPage() {
 
         {/* Filters at the top */}
         {genres.length > 0 && (
-          <TVFilters genres={genres} onFilterChange={setFilters} />
+          <TVFilters 
+            genres={genres} 
+            filters={filters}
+            onFilterChange={handleFilterChange} 
+            variant="green" 
+          />
         )}
 
         {/* TV Shows Grid */}
@@ -152,6 +254,16 @@ export default function OnTheAirPage() {
                   <TVCard key={tvShow.id} tvShow={tvShow} />
                 ))}
               </div>
+              {loadingMore && (
+                <div className="text-center py-8">
+                  <p className="text-gray-400">Daha fazla yükleniyor...</p>
+                </div>
+              )}
+              {!hasMore && tvShows.length > 0 && (
+                <div className="text-center py-8">
+                  <p className="text-gray-400">Tüm sonuçlar gösterildi.</p>
+                </div>
+              )}
             </>
           ) : (
             <div className="text-center py-12">
