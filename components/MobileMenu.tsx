@@ -93,11 +93,11 @@ export default function MobileMenu() {
                     Diziler
                   </a>
                   <a
-                    href="/tv/on-the-air"
+                    href="/yayin-akisi"
                     onClick={closeMenu}
                     className="px-3 py-2.5 rounded-lg text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.98] transition-all font-semibold text-base"
                   >
-                    Yayında
+                    Yayın Akışı
                   </a>
                 </div>
               </nav>
