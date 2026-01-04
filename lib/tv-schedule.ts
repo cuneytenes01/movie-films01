@@ -595,22 +595,8 @@ export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
     // Sadece bugünün dizileri bölümündeki li elementlerini al
     let foundTodaySection = false;
     let foundTomorrowSection = false;
-    let hasTodayHeader = false;
     
-    // Önce "Bugünün Dizileri" başlığının var olup olmadığını kontrol et
-    $('li').each((index, element) => {
-      const text = $(element).text().trim();
-      if (text.includes('Bugünün Dizileri')) {
-        hasTodayHeader = true;
-        return false; // break
-      }
-    });
-    
-    // Eğer "Bugünün Dizileri" başlığı yoksa, tüm li elementlerini çek (fallback)
-    if (!hasTodayHeader) {
-      foundTodaySection = true;
-    }
-    
+    // Tüm li elementlerini kontrol et
     $('li').each((index, element) => {
       const $el = $(element);
       const fullText = $el.text().trim();
@@ -636,6 +622,16 @@ export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
       
       // Zaman formatı kontrolü - eğer sadece tarih varsa (örn: "04 Jan2026"), atla
       if (/^\d{1,2}\s+[A-Z][a-z]{2}\d{4}$/.test(fullText)) {
+        return;
+      }
+      
+      // Eğer "Bugünün Dizileri" başlığı hiç bulunamadıysa, ilk zaman formatı içeren li'den itibaren başla (fallback)
+      if (!foundTodaySection && fullText.match(/(\d{1,2})\s*:\s*(\d{2})/)) {
+        foundTodaySection = true;
+      }
+      
+      // Eğer hala bugünün bölümüne gelmediysek, atla
+      if (!foundTodaySection) {
         return;
       }
       
@@ -769,22 +765,8 @@ export async function getTodayMovies(): Promise<TodayMovieItem[]> {
     // Sadece bugünün filmleri bölümündeki li elementlerini al
     let foundTodaySection = false;
     let foundTomorrowSection = false;
-    let hasTodayHeader = false;
     
-    // Önce "Bugünün Filmleri" başlığının var olup olmadığını kontrol et
-    $('li').each((index, element) => {
-      const text = $(element).text().trim();
-      if (text.includes('Bugünün Filmleri')) {
-        hasTodayHeader = true;
-        return false; // break
-      }
-    });
-    
-    // Eğer "Bugünün Filmleri" başlığı yoksa, tüm li elementlerini çek (fallback)
-    if (!hasTodayHeader) {
-      foundTodaySection = true;
-    }
-    
+    // Tüm li elementlerini kontrol et
     $('li').each((index, element) => {
       const $el = $(element);
       const fullText = $el.text().trim();
@@ -810,6 +792,16 @@ export async function getTodayMovies(): Promise<TodayMovieItem[]> {
       
       // Zaman formatı kontrolü - eğer sadece tarih varsa (örn: "04 Jan2026"), atla
       if (/^\d{1,2}\s+[A-Z][a-z]{2}\d{4}$/.test(fullText)) {
+        return;
+      }
+      
+      // Eğer "Bugünün Filmleri" başlığı hiç bulunamadıysa, ilk zaman formatı içeren li'den itibaren başla (fallback)
+      if (!foundTodaySection && fullText.match(/(\d{1,2})\s*:\s*(\d{2})/)) {
+        foundTodaySection = true;
+      }
+      
+      // Eğer hala bugünün bölümüne gelmediysek, atla
+      if (!foundTodaySection) {
         return;
       }
       
