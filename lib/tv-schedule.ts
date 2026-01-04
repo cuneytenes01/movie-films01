@@ -611,8 +611,11 @@ export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
       const timeMatch = fullText.match(/(\d{1,2})\s*:\s*(\d{2})/);
       if (timeMatch) {
         time = `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`;
-        // Zaman kısmını content'ten çıkar
-        content = fullText.replace(/\*\*?\s*(\d{1,2})\s*:\s*(\d{2})\s*\*\*?/g, '').trim();
+        // Zaman kısmını content'ten tamamen çıkar (hem **00**:00 hem de 00:00 formatlarını)
+        content = fullText
+          .replace(/\*\*?\s*(\d{1,2})\s*:\s*(\d{2})\s*\*\*?/g, '') // **00**:00 formatı
+          .replace(/(\d{1,2})\s*:\s*(\d{2})/g, '') // 00:00 formatı (başta kalan)
+          .trim();
       } else {
         // Fallback: strong elementinden al
         const $strong = $el.find('strong').first();
@@ -626,7 +629,11 @@ export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
             const minuteMatch = fullText.match(new RegExp(`${hour}\\s*:\\s*(\\d{2})`));
             if (minuteMatch) {
               time = `${hour.padStart(2, '0')}:${minuteMatch[1]}`;
-              content = fullText.replace(/\*\*?\s*(\d{1,2})\s*:\s*(\d{2})\s*\*\*?/g, '').trim();
+              // Zaman kısmını content'ten tamamen çıkar
+              content = fullText
+                .replace(/\*\*?\s*(\d{1,2})\s*:\s*(\d{2})\s*\*\*?/g, '') // **00**:00 formatı
+                .replace(/(\d{1,2})\s*:\s*(\d{2})/g, '') // 00:00 formatı (başta kalan)
+                .trim();
             } else {
               return;
             }
@@ -643,6 +650,11 @@ export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
         time = time.replace(/\s+/g, '').replace(/(\d{1,2})\s*:\s*(\d{2})/, (match, h, m) => {
           return `${h.padStart(2, '0')}:${m}`;
         });
+      }
+      
+      // Title'dan kalan zaman formatlarını da temizle (güvenlik için)
+      if (content) {
+        content = content.replace(/^(\d{1,2})\s*:\s*(\d{2})/g, '').trim();
       }
       
       if (!time || !content) return;
@@ -732,8 +744,11 @@ export async function getTodayMovies(): Promise<TodayMovieItem[]> {
       const timeMatch = fullText.match(/(\d{1,2})\s*:\s*(\d{2})/);
       if (timeMatch) {
         time = `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`;
-        // Zaman kısmını content'ten çıkar
-        content = fullText.replace(/\*\*?\s*(\d{1,2})\s*:\s*(\d{2})\s*\*\*?/g, '').trim();
+        // Zaman kısmını content'ten tamamen çıkar (hem **00**:00 hem de 00:00 formatlarını)
+        content = fullText
+          .replace(/\*\*?\s*(\d{1,2})\s*:\s*(\d{2})\s*\*\*?/g, '') // **00**:00 formatı
+          .replace(/(\d{1,2})\s*:\s*(\d{2})/g, '') // 00:00 formatı (başta kalan)
+          .trim();
       } else {
         // Fallback: strong elementinden al
         const $strong = $el.find('strong').first();
@@ -747,7 +762,11 @@ export async function getTodayMovies(): Promise<TodayMovieItem[]> {
             const minuteMatch = fullText.match(new RegExp(`${hour}\\s*:\\s*(\\d{2})`));
             if (minuteMatch) {
               time = `${hour.padStart(2, '0')}:${minuteMatch[1]}`;
-              content = fullText.replace(/\*\*?\s*(\d{1,2})\s*:\s*(\d{2})\s*\*\*?/g, '').trim();
+              // Zaman kısmını content'ten tamamen çıkar
+              content = fullText
+                .replace(/\*\*?\s*(\d{1,2})\s*:\s*(\d{2})\s*\*\*?/g, '') // **00**:00 formatı
+                .replace(/(\d{1,2})\s*:\s*(\d{2})/g, '') // 00:00 formatı (başta kalan)
+                .trim();
             } else {
               return;
             }
@@ -764,6 +783,11 @@ export async function getTodayMovies(): Promise<TodayMovieItem[]> {
         time = time.replace(/\s+/g, '').replace(/(\d{1,2})\s*:\s*(\d{2})/, (match, h, m) => {
           return `${h.padStart(2, '0')}:${m}`;
         });
+      }
+      
+      // Title'dan kalan zaman formatlarını da temizle (güvenlik için)
+      if (content) {
+        content = content.replace(/^(\d{1,2})\s*:\s*(\d{2})/g, '').trim();
       }
       
       if (!time || !content) return;
