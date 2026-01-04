@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { getPosterUrl, Movie } from '@/lib/tmdb'
 import { createSlug } from '@/lib/slug'
 import MovieFilters, { FilterState } from '@/components/MovieFilters'
@@ -60,7 +60,7 @@ function parseFiltersFromURL(searchParams: URLSearchParams): FilterState {
 }
 
 // Filtreleri URL'e yaz
-function updateURLFromFilters(filters: FilterState, router: ReturnType<typeof useRouter>) {
+function updateURLFromFilters(filters: FilterState, router: ReturnType<typeof useRouter>, pathname: string) {
   const params = new URLSearchParams()
   
   if (filters.sortBy !== 'popularity.desc') params.set('sort_by', filters.sortBy)
@@ -73,11 +73,12 @@ function updateURLFromFilters(filters: FilterState, router: ReturnType<typeof us
   if (filters.runtimeMax < 300) params.set('runtime_max', filters.runtimeMax.toString())
   
   const queryString = params.toString()
-  router.replace(queryString ? `?${queryString}` : window.location.pathname, { scroll: false })
+  router.replace(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false })
 }
 
-export default function MoviesPage() {
+function MoviesPageContent() {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   
   const [movies, setMovies] = useState<Movie[]>([])
@@ -206,8 +207,8 @@ export default function MoviesPage() {
   // Filtre değişikliği handler
   const handleFilterChange = useCallback((newFilters: FilterState) => {
     setFilters(newFilters)
-    updateURLFromFilters(newFilters, router)
-  }, [router])
+    updateURLFromFilters(newFilters, router, pathname)
+  }, [router, pathname])
 
   return (
     <div className="min-h-screen bg-gray-900 overflow-visible">
@@ -257,5 +258,17 @@ export default function MoviesPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function MoviesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <p className="text-gray-400">Yükleniyor...</p>
+      </div>
+    }>
+      <MoviesPageContent />
+    </Suspense>
   )
 }

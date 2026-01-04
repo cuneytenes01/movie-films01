@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { getPosterUrl, TVShow } from '@/lib/tmdb'
 import { createSlug } from '@/lib/slug'
 import TVFilters, { TVFilterState } from '@/components/TVFilters'
@@ -64,7 +64,7 @@ function parseFiltersFromURL(searchParams: URLSearchParams): TVFilterState {
 }
 
 // Filtreleri URL'e yaz
-function updateURLFromFilters(filters: TVFilterState, router: ReturnType<typeof useRouter>) {
+function updateURLFromFilters(filters: TVFilterState, router: ReturnType<typeof useRouter>, pathname: string) {
   const params = new URLSearchParams()
   
   if (filters.sortBy !== 'popularity.desc') params.set('sort_by', filters.sortBy)
@@ -81,11 +81,12 @@ function updateURLFromFilters(filters: TVFilterState, router: ReturnType<typeof 
   if (filters.language) params.set('language', filters.language)
   
   const queryString = params.toString()
-  router.replace(queryString ? `?${queryString}` : window.location.pathname, { scroll: false })
+  router.replace(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false })
 }
 
-export default function OnTheAirPage() {
+function OnTheAirPageContent() {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   
   const [tvShows, setTVShows] = useState<TVShow[]>([])
@@ -220,8 +221,8 @@ export default function OnTheAirPage() {
   // Filtre değişikliği handler
   const handleFilterChange = useCallback((newFilters: TVFilterState) => {
     setFilters(newFilters)
-    updateURLFromFilters(newFilters, router)
-  }, [router])
+    updateURLFromFilters(newFilters, router, pathname)
+  }, [router, pathname])
 
   return (
     <div className="min-h-screen bg-gray-900 overflow-visible">
@@ -274,5 +275,17 @@ export default function OnTheAirPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function OnTheAirPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <p className="text-gray-400">Yükleniyor...</p>
+      </div>
+    }>
+      <OnTheAirPageContent />
+    </Suspense>
   )
 }
