@@ -469,7 +469,6 @@ export async function getTodayMatches(sport: 'futbol' | 'basketbol' = 'futbol'):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       },
-      next: { revalidate: 3600 }, // 1 saat cache
     });
 
     if (!response.ok) {
@@ -538,7 +537,6 @@ export async function getTodaySeries(): Promise<TodaySeriesItem[]> {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       },
-      next: { revalidate: 3600 }, // 1 saat cache
     });
 
     if (!response.ok) {
@@ -617,7 +615,6 @@ export async function getTodayMovies(): Promise<TodayMovieItem[]> {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       },
-      next: { revalidate: 3600 }, // 1 saat cache
     });
 
     if (!response.ok) {
