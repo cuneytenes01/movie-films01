@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getTodayFootballMatches } from '@/lib/tvplus';
 
+export const runtime = 'edge';
+
 export async function GET() {
   try {
     const football = await getTodayFootballMatches();
